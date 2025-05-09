@@ -91,6 +91,7 @@ ob_start();
           </tr>
         </thead>
         <tbody>
+          <?php foreach ($projects as $project) : ?>
           <tr>
             <td>
               <div class="form-check">
@@ -103,16 +104,34 @@ ob_start();
                   <i class="fas fa-globe"></i>
                 </div>
                 <div>
-                  <div class="fw-bold">Thiết Kế Website</div>
-                  <div class="small text-muted">ID: PRJ-001</div>
+                  <div class="fw-bold"><?php echo $project['project_name']; ?></div>
+                  <div class="small text-muted">PRID0<?php echo $project['project_id']; ?></div>
                 </div>
               </div>
             </td>
-            <td>Công Ty TNHH ABC</td>
-            <td>15/10/2023</td>
-            <td>30/11/2023</td>
-            <td>₫15,000,000</td>
-            <td><span class="badge-status badge-active">Đang Tiến Hành</span></td>
+            <td><span class="badge bg-info"><?php echo $project['customer_name']; ?></span></td>
+            <td><?php echo $project['start_date']; ?></td>
+            <td>
+              <?php if ($project['end_date'] == null) : ?>
+              <span class="badge bg-secondary">
+                Chưa Xác Định
+              </span>
+              <?php else : ?>
+              <?php echo $project['end_date']; ?>
+              <?php endif; ?>
+            </td>
+            <td>₫<?php echo number_format($project['value'], 0, ',', '.'); ?></td>
+            <td>
+              <?php if ($project['status'] == 'Pending') : ?>
+              <span class="badge bg-warning">Chờ Xử Lý</span>
+              <?php elseif ($project['status'] == 'InProgress') : ?>
+              <span class="badge bg-info">Đang Tiến Hành</span>
+              <?php elseif ($project['status'] == 'Completed') : ?>
+              <span class="badge bg-success">Hoàn Thành</span>
+              <?php elseif ($project['status'] == 'Cancelled') : ?>
+              <span class="badge bg-danger">Đã Hủy</span>
+              <?php endif; ?>
+            </td>
             <td>
               <div class="btn-group btn-group-sm">
                 <a href="#" class="btn btn-outline-primary"><i class="fas fa-eye"></i></a>
@@ -121,96 +140,7 @@ ob_start();
               </div>
             </td>
           </tr>
-          <tr>
-            <td>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox">
-              </div>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <div class="project-icon rounded-circle bg-success text-white me-2">
-                  <i class="fas fa-shopping-cart"></i>
-                </div>
-                <div>
-                  <div class="fw-bold">Tích Hợp Thanh Toán</div>
-                  <div class="small text-muted">ID: PRJ-002</div>
-                </div>
-              </div>
-            </td>
-            <td>Shop XYZ</td>
-            <td>01/10/2023</td>
-            <td>25/10/2023</td>
-            <td>₫8,500,000</td>
-            <td><span class="badge-status badge-completed">Hoàn Thành</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info"><i class="fas fa-edit"></i></a>
-                <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox">
-              </div>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <div class="project-icon rounded-circle bg-info text-white me-2">
-                  <i class="fas fa-mobile-alt"></i>
-                </div>
-                <div>
-                  <div class="fw-bold">Ứng Dụng Di Động</div>
-                  <div class="small text-muted">ID: PRJ-003</div>
-                </div>
-              </div>
-            </td>
-            <td>Startup Tech</td>
-            <td>01/11/2023</td>
-            <td>15/01/2024</td>
-            <td>₫25,000,000</td>
-            <td><span class="badge-status badge-pending">Chờ Xử Lý</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info"><i class="fas fa-edit"></i></a>
-                <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox">
-              </div>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <div class="project-icon rounded-circle bg-warning text-white me-2">
-                  <i class="fas fa-search"></i>
-                </div>
-                <div>
-                  <div class="fw-bold">Tối Ưu Hóa SEO</div>
-                  <div class="small text-muted">ID: PRJ-004</div>
-                </div>
-              </div>
-            </td>
-            <td>Cửa Hàng Online</td>
-            <td>15/09/2023</td>
-            <td>15/10/2023</td>
-            <td>₫5,000,000</td>
-            <td><span class="badge-status badge-cancelled">Đã Hủy</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info"><i class="fas fa-edit"></i></a>
-                <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
-              </div>
-            </td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -312,4 +242,4 @@ $content = ob_get_clean();
 
 // Include the layout template
 include __DIR__ . '/layout.php';
-?> 
+?>

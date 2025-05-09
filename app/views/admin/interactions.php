@@ -74,83 +74,34 @@ ob_start();
   <div class="card-body p-4">
     <div class="timeline">
       <!-- Interaction 1 -->
+      <?php foreach ($interactions as $interaction) : ?>
       <div class="timeline-item mb-4">
         <div class="timeline-item-marker">
+          <?php if ($interaction['interaction_type'] == 'Call') : ?>
           <div class="timeline-item-marker-indicator bg-primary">
             <i class="fas fa-phone-alt text-white"></i>
           </div>
-        </div>
-        <div class="timeline-item-content">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <span class="badge bg-primary me-2">Cuộc Gọi</span>
-              <a href="#" class="fw-bold text-decoration-none">Công Ty TNHH ABC</a>
-            </div>
-            <div class="small text-muted">
-              <i class="far fa-clock me-1"></i> Hôm nay, 14:30
-            </div>
-          </div>
-          <p class="mb-2">Thảo luận về quy trình triển khai dự án và tiến độ. Khách hàng hài lòng với tiến độ hiện tại và đã đồng ý với các điều khoản mới.</p>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
-              <i class="fas fa-user me-1"></i> Tạo bởi: Admin
-            </div>
-            <div>
-              <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Interaction 2 -->
-      <div class="timeline-item mb-4">
-        <div class="timeline-item-marker">
-          <div class="timeline-item-marker-indicator bg-info">
+          <?php elseif ($interaction['interaction_type'] == 'Email') : ?>
+          <div class="timeline-item-marker-indicator bg-warning">
             <i class="fas fa-envelope text-white"></i>
           </div>
-        </div>
-        <div class="timeline-item-content">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <span class="badge bg-info me-2">Email</span>
-              <a href="#" class="fw-bold text-decoration-none">Startup Tech</a>
-            </div>
-            <div class="small text-muted">
-              <i class="far fa-clock me-1"></i> Hôm qua, 10:15
-            </div>
-          </div>
-          <p class="mb-2">Gửi báo giá chi tiết cho dự án ứng dụng di động. Khách hàng đang xem xét hai gói dịch vụ khác nhau và sẽ phản hồi trong tuần này.</p>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
-              <i class="fas fa-user me-1"></i> Tạo bởi: Admin
-            </div>
-            <div>
-              <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Interaction 3 -->
-      <div class="timeline-item mb-4">
-        <div class="timeline-item-marker">
+          <?php elseif ($interaction['interaction_type'] == 'Meeting') : ?>
           <div class="timeline-item-marker-indicator bg-success">
             <i class="fas fa-handshake text-white"></i>
           </div>
+          <?php endif; ?>
         </div>
         <div class="timeline-item-content">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
-              <span class="badge bg-success me-2">Cuộc Họp</span>
-              <a href="#" class="fw-bold text-decoration-none">Shop XYZ</a>
+              <span class="badge bg-primary me-2"><?php echo $interaction['interaction_type']; ?></span>
+              <a href="#" class="fw-bold text-decoration-none"><?php echo $interaction['customer_name']; ?></a>
             </div>
             <div class="small text-muted">
-              <i class="far fa-clock me-1"></i> 3 ngày trước, 09:00
+              <i class="far fa-clock me-1"></i> <?php echo $interaction['created_at']; ?>
             </div>
           </div>
-          <p class="mb-2">Thống nhất các yêu cầu cuối cùng và hoàn tất thanh toán. Khách hàng đã chuẩn bị nội dung và sẽ gửi tài liệu trong vòng 48 giờ.</p>
+          <p class="mb-2"><?php echo $interaction['summary']; ?></p>
           <div class="d-flex justify-content-between align-items-center">
             <div class="small text-muted">
               <i class="fas fa-user me-1"></i> Tạo bởi: Admin
@@ -162,36 +113,7 @@ ob_start();
           </div>
         </div>
       </div>
-
-      <!-- Interaction 4 -->
-      <div class="timeline-item mb-4">
-        <div class="timeline-item-marker">
-          <div class="timeline-item-marker-indicator bg-warning">
-            <i class="fas fa-sticky-note text-white"></i>
-          </div>
-        </div>
-        <div class="timeline-item-content">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <span class="badge bg-warning me-2">Ghi Chú</span>
-              <a href="#" class="fw-bold text-decoration-none">Cửa Hàng Online</a>
-            </div>
-            <div class="small text-muted">
-              <i class="far fa-clock me-1"></i> 1 tuần trước, 16:45
-            </div>
-          </div>
-          <p class="mb-2">Khách hàng quyết định tạm hoãn dự án do vấn đề ngân sách. Sẽ liên hệ lại vào quý sau khi có kế hoạch tài chính mới.</p>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
-              <i class="fas fa-user me-1"></i> Tạo bởi: Admin
-            </div>
-            <div>
-              <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
-            </div>
-          </div>
-        </div>
-      </div>
+      <?php endforeach; ?>
 
       <div class="timeline-end-icon">
         <i class="fas fa-chevron-down"></i>
@@ -216,7 +138,8 @@ ob_start();
 </div>
 
 <!-- Modal thêm tương tác mới -->
-<div class="modal fade" id="addInteractionModal" tabindex="-1" aria-labelledby="addInteractionModalLabel" aria-hidden="true">
+<div class="modal fade" id="addInteractionModal" tabindex="-1" aria-labelledby="addInteractionModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -322,4 +245,4 @@ $content = ob_get_clean();
 
 // Include the layout template
 include __DIR__ . '/layout.php';
-?> 
+?>

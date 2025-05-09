@@ -8,10 +8,14 @@ require __DIR__ . '/app/controllers/HomeController.php';
 
 $request = $_SERVER['REQUEST_URI'];
 
-if ($request == '/' || $request == '/home') {
+if ($request == '/') {
   $homeController = new HomeController();
   $homeController->index();
 
+} elseif ($request == '/contact') {
+  $homeController = new HomeController();
+  $homeController->contact();
+  
 } elseif ($request == '/admin') {
   $adminController = new AdminController();
   if ($_SERVER['REQUEST_METHOD'] == 'POST') {

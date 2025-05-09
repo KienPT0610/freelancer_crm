@@ -227,25 +227,62 @@
   <section id="contact" class="py-5 bg-light">
     <div class="container">
       <h2 class="text-center mb-4 animate__animated animate__fadeInUp">Liên Hệ Với Tôi</h2>
+      
+      <?php if (isset($_SESSION['success'])): ?>
+      <div class="alert alert-success alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <?php endif; ?>
+      
+      <?php if (isset($_SESSION['error'])): ?>
+      <div class="alert alert-danger alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+        <i class="fas fa-exclamation-triangle mr-2"></i> <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <?php endif; ?>
+      
       <div class="row">
         <div class="col-md-6 animate__animated animate__fadeInLeft">
           <h3>Gửi tin nhắn cho tôi</h3>
-          <form action="mailto:fbkienpt@gmail.com" method="post" enctype="text/plain">
+          <form action="/contact" method="post">
             <div class="form-group">
               <label for="name">Tên của bạn:</label>
-              <input type="text" class="form-control" id="name" name="name" required>
+              <input type="text" class="form-control" id="name" name="name" value="<?php echo $_SESSION['form_data']['name'] ?? ''; ?>" required>
+              <?php if (isset($_SESSION['form_errors']['name'])): ?>
+                <small class="text-danger"><?php echo $_SESSION['form_errors']['name']; ?></small>
+              <?php endif; ?>
             </div>
             <div class="form-group">
               <label for="email">Địa chỉ email:</label>
-              <input type="email" class="form-control" id="email" name="email" required>
+              <input type="email" class="form-control" id="email" name="email" value="<?php echo $_SESSION['form_data']['email'] ?? ''; ?>" required>
+              <?php if (isset($_SESSION['form_errors']['email'])): ?>
+                <small class="text-danger"><?php echo $_SESSION['form_errors']['email']; ?></small>
+              <?php endif; ?>
+            </div>
+            <div class="form-group">
+              <label for="phone">Số điện thoại:</label>
+              <input type="tel" class="form-control" id="phone" name="phone" value="<?php echo $_SESSION['form_data']['phone'] ?? ''; ?>">
             </div>
             <div class="form-group">
               <label for="message">Lời nhắn:</label>
-              <textarea class="form-control" id="message" name="message" rows="7" required></textarea>
+              <textarea class="form-control" id="message" name="message" rows="5" required><?php echo $_SESSION['form_data']['message'] ?? ''; ?></textarea>
+              <?php if (isset($_SESSION['form_errors']['message'])): ?>
+                <small class="text-danger"><?php echo $_SESSION['form_errors']['message']; ?></small>
+              <?php endif; ?>
             </div>
             <button type="submit" class="btn btn-primary btn-block btn-lg">Gửi tin nhắn <i
                 class="fas fa-paper-plane ml-2"></i></button>
           </form>
+          <?php 
+            // Clear form data and errors after displaying
+            if (isset($_SESSION['form_data'])) unset($_SESSION['form_data']); 
+            if (isset($_SESSION['form_errors'])) unset($_SESSION['form_errors']); 
+          ?>
         </div>
         <div class="col-md-6 animate__animated animate__fadeInRight">
           <h3>Thông tin liên hệ</h3>

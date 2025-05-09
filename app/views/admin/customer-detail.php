@@ -14,10 +14,9 @@ ob_start();
     <a href="/admin/customers" class="btn btn-outline-secondary me-2">
       <i class="fas fa-arrow-left me-2"></i> Quay Lại
     </a>
-    <a href="/admin/customers/<?php echo $customer['customer_id']; ?>/update"
-      class="btn btn-primary text-white text-decoration-none">
+    <button type="submit" form="customerForm" class="btn btn-primary" id="saveCustomerBtn">
       <i class="fas fa-save me-2"></i> Lưu Thay Đổi
-    </a>
+    </button>
   </div>
 </div>
 
@@ -29,8 +28,21 @@ ob_start();
         <h5 class="mb-0">Thông Tin Cơ Bản</h5>
       </div>
       <div class="card-body">
-        <form id="customerForm" method="post">
-          <input type="hidden" id="customerId" name="id" value="<?php echo $customer['id'] ?? ''; ?>">
+        <form id="customerForm" method="post" action="/admin/customers/<?php echo $customer['customer_id']; ?>/update">
+          <input type="hidden" id="customerId" name="customer_id" value="<?php echo $customer['customer_id'] ?? ''; ?>">
+
+          <!-- Display success or error messages if they exist -->
+          <?php if (isset($_SESSION['success'])): ?>
+          <div class="alert alert-success">
+            <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+          </div>
+          <?php endif; ?>
+
+          <?php if (isset($_SESSION['error'])): ?>
+          <div class="alert alert-danger">
+            <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+          </div>
+          <?php endif; ?>
 
           <div class="row mb-3">
             <div class="col-md-6">
@@ -131,7 +143,7 @@ ob_start();
         <ul class="list-group list-group-flush">
           <li class="list-group-item d-flex justify-content-between align-items-center px-0">
             <span>Số Dự Án</span>
-            <span class="badge bg-primary rounded-pill">2</span>
+            <span class="badge bg-primary rounded-pill"><?php echo count($projects); ?></span>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center px-0">
             <span>Tổng Doanh Thu</span>
@@ -139,15 +151,15 @@ ob_start();
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center px-0">
             <span>Số Tương Tác</span>
-            <span class="badge bg-info rounded-pill">8</span>
+            <span class="badge bg-info rounded-pill"><?php echo count($interactions); ?></span>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center px-0">
             <span>Tương Tác Cuối</span>
-            <span>15/11/2023</span>
+            <span><?php echo $interactions[0]['created_at']; ?></span>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center px-0">
             <span>Ngày Tham Gia</span>
-            <span>01/10/2023</span>
+            <span><?php echo $customer['created_at']; ?></span>
           </li>
         </ul>
       </div>
@@ -200,6 +212,7 @@ ob_start();
           </tr>
         </thead>
         <tbody>
+          <?php foreach ($projects as $project) : ?>
           <tr>
             <td>
               <div class="d-flex align-items-center">
@@ -207,15 +220,31 @@ ob_start();
                   <i class="fas fa-globe"></i>
                 </div>
                 <div>
-                  <div class="fw-bold">Thiết Kế Website</div>
-                  <div class="small text-muted">ID: PRJ-001</div>
+                  <div class="fw-bold"><?php echo $project['project_name']; ?></div>
+                  <div class="small text-muted">ID: <?php echo $project['project_id']; ?></div>
                 </div>
               </div>
             </td>
-            <td>15/10/2023</td>
-            <td>30/11/2023</td>
-            <td>₫15,000,000</td>
-            <td><span class="badge-status badge-active">Đang Tiến Hành</span></td>
+            <td><?php echo $project['start_date']; ?></td>
+            <td>
+              <?php if ($project['end_date'] == null) : ?>
+              <span class="badge bg-secondary">
+                Chưa Xác Định
+              </span>
+              <?php else : ?>
+              <?php echo $project['end_date']; ?>
+              <?php endif; ?>
+            </td>
+            <td>₫<?php echo $project['value']; ?></td>
+            <td>
+              <?php if ($project['status'] == 'Pending') : ?>
+              <span class="badge bg-warning">Chờ Xử Lý</span>
+              <?php elseif ($project['status'] == 'InProgress') : ?>
+              <span class="badge bg-info">Đang Tiến Hành</span>
+              <?php elseif ($project['status'] == 'Completed') : ?>
+              <span class="badge bg-success">Hoàn Thành</span>
+              <?php endif; ?>
+            </td>
             <td>
               <div class="btn-group btn-group-sm">
                 <a href="#" class="btn btn-outline-primary"><i class="fas fa-eye"></i></a>
@@ -223,29 +252,7 @@ ob_start();
               </div>
             </td>
           </tr>
-          <tr>
-            <td>
-              <div class="d-flex align-items-center">
-                <div class="project-icon rounded-circle bg-success text-white me-2">
-                  <i class="fas fa-shopping-cart"></i>
-                </div>
-                <div>
-                  <div class="fw-bold">Tích Hợp Thanh Toán</div>
-                  <div class="small text-muted">ID: PRJ-002</div>
-                </div>
-              </div>
-            </td>
-            <td>01/10/2023</td>
-            <td>25/10/2023</td>
-            <td>₫8,500,000</td>
-            <td><span class="badge-status badge-completed">Hoàn Thành</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info"><i class="fas fa-edit"></i></a>
-              </div>
-            </td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -263,86 +270,30 @@ ob_start();
   <div class="card-body p-4">
     <div class="timeline">
       <!-- Interaction 1 -->
+      <?php foreach ($interactions as $interaction) : ?>
       <div class="timeline-item mb-4">
         <div class="timeline-item-marker">
+          <?php if ($interaction['interaction_type'] == 'Call') : ?>
           <div class="timeline-item-marker-indicator bg-primary">
             <i class="fas fa-phone-alt text-white"></i>
           </div>
-        </div>
-        <div class="timeline-item-content">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <span class="badge bg-primary me-2">Cuộc Gọi</span>
-              <span class="fw-bold">Thảo luận về tiến độ dự án</span>
-            </div>
-            <div class="small text-muted">
-              <i class="far fa-clock me-1"></i> 15/11/2023, 14:30
-            </div>
-          </div>
-          <p class="mb-2">Thảo luận về quy trình triển khai dự án và tiến độ. Khách hàng hài lòng với tiến độ hiện tại
-            và đã đồng ý với các điều khoản mới.</p>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
-              <i class="fas fa-user me-1"></i> Tạo bởi: Admin
-            </div>
-            <div>
-              <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Interaction 2 -->
-      <div class="timeline-item mb-4">
-        <div class="timeline-item-marker">
-          <div class="timeline-item-marker-indicator bg-info">
+          <?php elseif ($interaction['interaction_type'] == 'Email') : ?>
+          <div class="timeline-item-marker-indicator bg-warning">
             <i class="fas fa-envelope text-white"></i>
           </div>
-        </div>
-        <div class="timeline-item-content">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <span class="badge bg-info me-2">Email</span>
-              <span class="fw-bold">Gửi báo giá chi tiết</span>
-            </div>
-            <div class="small text-muted">
-              <i class="far fa-clock me-1"></i> 10/11/2023, 10:15
-            </div>
-          </div>
-          <p class="mb-2">Gửi báo giá chi tiết cho dự án website. Khách hàng đang xem xét hai gói dịch vụ khác nhau và
-            sẽ phản hồi trong tuần này.</p>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
-              <i class="fas fa-user me-1"></i> Tạo bởi: Admin
-            </div>
-            <div>
-              <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Interaction 3 -->
-      <div class="timeline-item mb-4">
-        <div class="timeline-item-marker">
+          <?php elseif ($interaction['interaction_type'] == 'Meeting') : ?>
           <div class="timeline-item-marker-indicator bg-success">
             <i class="fas fa-handshake text-white"></i>
           </div>
+          <?php endif; ?>
         </div>
         <div class="timeline-item-content">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <span class="badge bg-success me-2">Cuộc Họp</span>
-              <span class="fw-bold">Cuộc họp khởi động dự án</span>
-            </div>
             <div class="small text-muted">
-              <i class="far fa-clock me-1"></i> 05/10/2023, 09:00
+              <i class="far fa-clock me-1"></i> <?php echo $interaction['created_at']; ?>
             </div>
           </div>
-          <p class="mb-2">Thống nhất các yêu cầu cuối cùng và hoàn tất thanh toán đợt đầu. Khách hàng đã chuẩn bị nội
-            dung và sẽ gửi tài liệu trong vòng 48 giờ.</p>
+          <p class="mb-2"><?php echo $interaction['summary']; ?></p>
           <div class="d-flex justify-content-between align-items-center">
             <div class="small text-muted">
               <i class="fas fa-user me-1"></i> Tạo bởi: Admin
@@ -354,6 +305,7 @@ ob_start();
           </div>
         </div>
       </div>
+      <?php endforeach; ?>
 
       <div class="timeline-end-icon">
         <i class="fas fa-chevron-down"></i>

@@ -31,7 +31,7 @@
     </a>
 
     <div class="sidebar-heading">Trang</div>
-    <a class="sidebar-item <?php echo $active_page == 'reports' ? 'active' : ''; ?>" href="/home">
+    <a class="sidebar-item <?php echo $active_page == 'reports' ? 'active' : ''; ?>" href="/">
       <i class="fas fa-chart-bar"></i>
       <span>Trang chủ</span>
     </a>

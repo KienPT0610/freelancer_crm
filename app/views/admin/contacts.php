@@ -93,21 +93,27 @@ ob_start();
           </tr>
         </thead>
         <tbody>
-          <tr class="unread-row">
+          <?php foreach ($contacts as $contact) : ?>
+          <tr <?php echo $contact['is_read'] == 0 ? 'class="unread-row"' : ''; ?>>
             <td>
               <div class="form-check">
                 <input class="form-check-input contact-checkbox" type="checkbox">
               </div>
             </td>
             <td>
-              <div class="fw-bold">Nguyễn Văn A</div>
+              <div class="fw-bold"><?php echo $contact['name']; ?></div>
             </td>
-            <td>nguyenvana@example.com</td>
-            <td>Tư vấn dịch vụ</td>
-            <td class="text-truncate" style="max-width: 200px;">Tôi muốn tìm hiểu về dịch vụ thiết kế website của công
-              ty...</td>
-            <td>2 giờ trước</td>
-            <td><span class="badge bg-danger">Chưa đọc</span></td>
+            <td><?php echo $contact['email']; ?></td>
+            <td><?php echo $contact['subject']; ?></td>
+            <td class="text-truncate" style="max-width: 200px;"><?php echo $contact['message']; ?></td>
+            <td><?php echo $contact['submission_date']; ?></td>
+            <td>
+              <?php if ($contact['status'] == 'New') : ?>
+              <span class="badge bg-danger">Chưa liên hệ</span>
+              <?php elseif ($contact['status'] == 'Contacted') : ?>
+              <span class="badge bg-success">Đã liên hệ</span>
+              <?php endif; ?>
+            </td>
             <td>
               <div class="btn-group btn-group-sm">
                 <a href="#" class="btn btn-outline-primary view-contact"><i class="fas fa-eye"></i></a>
@@ -116,98 +122,7 @@ ob_start();
               </div>
             </td>
           </tr>
-          <tr class="unread-row">
-            <td>
-              <div class="form-check">
-                <input class="form-check-input contact-checkbox" type="checkbox">
-              </div>
-            </td>
-            <td>
-              <div class="fw-bold">Trần Thị B</div>
-            </td>
-            <td>tranthib@example.com</td>
-            <td>Giải pháp thương mại điện tử</td>
-            <td class="text-truncate" style="max-width: 200px;">Cần tư vấn về giải pháp thương mại điện tử cho cửa hàng
-              của tôi...</td>
-            <td>5 giờ trước</td>
-            <td><span class="badge bg-danger">Chưa đọc</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary view-contact"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info reply-contact"><i class="fas fa-reply"></i></a>
-                <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class="form-check">
-                <input class="form-check-input contact-checkbox" type="checkbox">
-              </div>
-            </td>
-            <td>
-              <div>Công Ty XYZ</div>
-            </td>
-            <td>contact@xyz.com</td>
-            <td>Tìm đối tác phát triển phần mềm</td>
-            <td class="text-truncate" style="max-width: 200px;">Chúng tôi cần một đối tác phát triển phần mềm dài hạn
-              cho dự án của công ty...</td>
-            <td>1 ngày trước</td>
-            <td><span class="badge bg-success">Đã đọc</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary view-contact"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info reply-contact"><i class="fas fa-reply"></i></a>
-                <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class="form-check">
-                <input class="form-check-input contact-checkbox" type="checkbox">
-              </div>
-            </td>
-            <td>
-              <div>Lê Văn C</div>
-            </td>
-            <td>levanc@example.com</td>
-            <td>Báo giá ứng dụng di động</td>
-            <td class="text-truncate" style="max-width: 200px;">Tôi cần báo giá cho một dự án ứng dụng di động theo yêu
-              cầu đính kèm...</td>
-            <td>2 ngày trước</td>
-            <td><span class="badge bg-primary">Đã trả lời</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary view-contact"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info reply-contact"><i class="fas fa-reply"></i></a>
-                <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class="form-check">
-                <input class="form-check-input contact-checkbox" type="checkbox">
-              </div>
-            </td>
-            <td>
-              <div>Phạm Thị D</div>
-            </td>
-            <td>phamthid@example.com</td>
-            <td>Dịch vụ quản trị website</td>
-            <td class="text-truncate" style="max-width: 200px;">Tôi đang tìm kiếm dịch vụ quản trị website cho shop thời
-              trang...</td>
-            <td>4 ngày trước</td>
-            <td><span class="badge bg-primary">Đã trả lời</span></td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="#" class="btn btn-outline-primary view-contact"><i class="fas fa-eye"></i></a>
-                <a href="#" class="btn btn-outline-info reply-contact"><i class="fas fa-reply"></i></a>
-                <a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
-              </div>
-            </td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>

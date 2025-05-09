@@ -2,6 +2,10 @@
 namespace App\Controllers;
 use App\Models\User;
 use App\Models\Customer;
+use App\Models\Project;
+use App\Models\Contact;
+use App\Models\Interaction;
+
 class AdminController {
   public function index() {
     // Nếu đã login thì redirect về home
@@ -64,6 +68,10 @@ class AdminController {
     // Load customer model
     $customerModel = new Customer();
     $customer = $customerModel->getCustomerById($id);
+    $projectModel = new Project();
+    $projects = $projectModel->getProjectByCustomerId($id);
+    $interactionModel = new Interaction();
+    $interactions = $interactionModel->getInteractionByCustomerId($id);
     
     // If customer not found, redirect to customers list
     if (!$customer) {
@@ -112,14 +120,20 @@ class AdminController {
   }
 
   public function projects() {
+    $projectModel = new Project();
+    $projects = $projectModel->getAllProjects();
     include __DIR__ . '/../views/admin/projects.php';
   }
 
   public function interactions() {
+    $interactionModel = new Interaction();
+    $interactions = $interactionModel->getAllInteractions();
     include __DIR__ . '/../views/admin/interactions.php';
   }
 
   public function contacts() {
+    $contactModel = new Contact();
+    $contacts = $contactModel->getAllContacts();
     include __DIR__ . '/../views/admin/contacts.php';
   }
 
