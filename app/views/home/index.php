@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trang Chủ - Phạm Trung Kiên</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="./../../../public/assets/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -17,7 +17,8 @@
   <header class="fixed-top bg-white shadow-sm" id="mainNav">
     <nav class="navbar navbar-expand-lg navbar-light container">
       <a class="navbar-brand" href="#">
-        <img src="assets/images/logo.png" alt="Logo Phạm Trung Kiên" height="30"> [Freelancer] Phạm Trung Kiên
+        <img src="./../../../public/assets/images/logo.png" alt="Logo Phạm Trung Kiên" height="30"> [Freelancer] Phạm
+        Trung Kiên
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
         aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +59,8 @@
           <a href="#contact" class="btn btn-light btn-lg">Liên hệ ngay</a>
         </div>
         <div class="col-md-6 animate__animated animate__fadeInRight">
-          <img src="assets/images/hero-image.png" alt="Hình ảnh giới thiệu Blockchain" class="img-fluid">
+          <img src="./../../../public/assets/images/hero-image.png" alt="Hình ảnh giới thiệu Blockchain"
+            class="img-fluid">
         </div>
       </div>
     </div>
@@ -69,7 +71,8 @@
       <h2 class="text-center mb-4 animate__animated animate__fadeInUp">Về Tôi</h2>
       <div class="row align-items-center">
         <div class="col-md-4 animate__animated animate__fadeInLeft">
-          <img src="assets/images/avatar.png" alt="Avatar Phạm Trung Kiên" class="img-fluid rounded-circle shadow">
+          <img src="./../../../public/assets/images/avatar.png" alt="Avatar Phạm Trung Kiên"
+            class="img-fluid rounded-circle shadow">
         </div>
         <div class="col-md-8 animate__animated animate__fadeInRight">
           <h3>Phạm Trung Kiên</h3>
@@ -160,7 +163,7 @@
       <div class="row">
         <div class="col-md-6 mb-4 animate__animated animate__fadeInLeft animate__delay-0-5s">
           <div class="card shadow-sm">
-            <img src="assets/images/project-1.jpg" alt="Dự án 1" class="card-img-top">
+            <img src="./../../../public/assets/images/project-1.jpg" alt="Dự án 1" class="card-img-top">
             <div class="card-body">
               <h5 class="card-title">[Tên Dự Án 1]</h5>
               <p class="card-text">[Mô tả ngắn gọn về dự án 1].</p>
@@ -170,7 +173,7 @@
         </div>
         <div class="col-md-6 mb-4 animate__animated animate__fadeInRight animate__delay-0-5s">
           <div class="card shadow-sm">
-            <img src="assets/images/project-2.jpg" alt="Dự án 2" class="card-img-top">
+            <img src="./../../../public/assets/images/project-2.jpg" alt="Dự án 2" class="card-img-top">
             <div class="card-body">
               <h5 class="card-title">[Tên Dự Án 2]</h5>
               <p class="card-text">[Mô tả ngắn gọn về dự án 2].</p>
@@ -192,8 +195,8 @@
         <div class="col-md-6 mb-4 animate__animated animate__fadeInLeft animate__delay-0-5s">
           <div class="card shadow-sm border-left-warning border-left-thick h-100">
             <div class="card-body d-flex">
-              <img src="assets/images/avatar-client-1.png" alt="Avatar khách hàng 1" class="rounded-circle mr-3"
-                width="60" height="60">
+              <img src="./../../../public/assets/images/avatar-client-1.png" alt="Avatar khách hàng 1"
+                class="rounded-circle mr-3" width="60" height="60">
               <div>
                 <p class="card-text"><i class="fas fa-quote-left text-muted mr-2"></i> [Lời chứng thực 1 từ khách hàng].
                   <i class="fas fa-quote-right text-muted ml-2"></i>
@@ -206,8 +209,8 @@
         <div class="col-md-6 mb-4 animate__animated animate__fadeInRight animate__delay-0-5s">
           <div class="card shadow-sm border-left-warning border-left-thick h-100">
             <div class="card-body d-flex">
-              <img src="assets/images/avatar-client-1.png" alt="Avatar khách hàng 2" class="rounded-circle mr-3"
-                width="60" height="60">
+              <img src="./../../../public/assets/images/avatar-client-1.png" alt="Avatar khách hàng 2"
+                class="rounded-circle mr-3" width="60" height="60">
               <div>
                 <p class="card-text"><i class="fas fa-quote-left text-muted mr-2"></i> [Lời chứng thực 2 từ khách hàng].
                   <i class="fas fa-quote-right text-muted ml-2"></i>
