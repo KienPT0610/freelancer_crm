@@ -287,13 +287,13 @@ ob_start();
           <div class="mb-3">
             <label for="editInteractionType" class="form-label">Loại Tương Tác</label>
             <select class="form-select" id="editInteractionType" name="interaction_type" required>
-              <option value="email" <?php if ($interaction['interaction_type'] == 'email') echo 'selected'; ?>>Email
+              <option value="Email" <?php if ($interaction['interaction_type'] == 'Email') echo 'selected'; ?>>Email
               </option>
-              <option value="phone" <?php if ($interaction['interaction_type'] == 'phone') echo 'selected'; ?>>Cuộc Gọi
+              <option value="Phone" <?php if ($interaction['interaction_type'] == 'Call') echo 'selected'; ?>>Call
               </option>
-              <option value="meeting" <?php if ($interaction['interaction_type'] == 'meeting') echo 'selected'; ?>>Cuộc
-                Họp</option>
-              <option value="other" <?php if ($interaction['interaction_type'] == 'other') echo 'selected'; ?>>Khác
+              <option value="Meeting" <?php if ($interaction['interaction_type'] == 'Meeting') echo 'selected'; ?>>
+                Meeting</option>
+              <option value="Other" <?php if ($interaction['interaction_type'] == 'Other') echo 'selected'; ?>>Khác
               </option>
             </select>
           </div>
