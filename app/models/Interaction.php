@@ -66,7 +66,7 @@ class Interaction {
         return "$key = :$key";
       }, array_keys($data)));
 
-      $sql = "UPDATE interactions SET $setPart, updated_at = NOW() WHERE interaction_id = :interaction_id";
+      $sql = "UPDATE interactions SET $setPart, created_at = NOW() WHERE interaction_id = :interaction_id";
       $stmt = $this->db->prepare($sql);
       $data['interaction_id'] = $interaction_id;
       $result = $stmt->execute($data);

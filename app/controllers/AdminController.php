@@ -277,6 +277,10 @@ class AdminController {
       header('Location: /admin/interactions/' . $id);
       exit();
     }
+
+    echo "<pre>";
+    print_r($data);
+    echo "</pre>";
     
     $success = $interactionModel->updateInteraction($id, $data);
 
