@@ -97,10 +97,10 @@ if ($request == '/') {
   $id = $matches[1];
   $adminController = new AdminController();
   $adminController->updateSiteContent($id);
-// } elseif (preg_match('#^/admin/site-content/(\d+)/delete$#', $request, $matches)) {
-//   $id = $matches[1];
-//   $adminController = new AdminController();
-//   $adminController->deleteSiteContent($id);
+} elseif (preg_match('#^/admin/site-content/(\d+)/delete$#', $request, $matches)) {
+  $id = $matches[1];
+  $adminController = new AdminController();
+  $adminController->deleteSiteContent($id);
 } elseif ($request == '/logout') {
   $adminController = new AdminController();
   $adminController->logout();

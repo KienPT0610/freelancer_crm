@@ -354,6 +354,12 @@ class AdminController {
     include __DIR__ . '/../views/admin/update-site-content.php';
   }
 
+  public function deleteSiteContent($id) {
+    $siteContentModel = new SiteContent();
+    $siteContentModel->deleteContent($id);
+    header('Location: /admin/site-content');
+    exit();
+  }
 }
 
 ?>

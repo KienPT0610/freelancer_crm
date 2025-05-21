@@ -111,6 +111,7 @@ ob_start();
               <a href="/admin/interactions/<?php echo $interaction['interaction_id']; ?>"
                 class="btn btn-sm btn-outline-secondary me-2"><i class="fas fa-edit"></i></a>
               <a href="/admin/interactions/<?php echo $interaction['interaction_id']; ?>/delete"
+                onclick="return confirm('Bạn có chắc chắn muốn xóa nội dung này?');"
                 class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
             </div>
           </div>
