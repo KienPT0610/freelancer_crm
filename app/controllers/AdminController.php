@@ -129,6 +129,25 @@ class AdminController {
     
     $customerModel = new Customer();
 
+    if (isset($_FILES['avatar_url']) && $_FILES['avatar_url']['error'] === UPLOAD_ERR_OK) {
+      $uploadDir = __DIR__ . './../../public/uploads/';
+      if (!is_dir($uploadDir)) {
+          mkdir($uploadDir, 0755, true);
+      }
+      $fileName = uniqid() . '-' . $_FILES['avatar_url']['name'];
+      $uploadPath = $uploadDir . $fileName;
+
+      $_POST['avatar_url'] = $fileName;
+
+      if (move_uploaded_file($_FILES['avatar_url']['tmp_name'], $uploadPath)) {
+          $data['avatar_url'] = "/uploads/$fileName";
+      } else {
+          $_SESSION['error'] = "Lỗi tải ảnh.";
+          header("Location: /admin/customers/$id");
+          exit();
+      }
+    }
+
     // Get POST data and filter out empty values
     $data = array_filter($_POST, function($value) {
       return $value !== '' && $value !== null;
@@ -278,10 +297,6 @@ class AdminController {
       exit();
     }
 
-    echo "<pre>";
-    print_r($data);
-    echo "</pre>";
-    
     $success = $interactionModel->updateInteraction($id, $data);
 
     if (!$success) {

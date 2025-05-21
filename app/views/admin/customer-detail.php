@@ -28,16 +28,20 @@ ob_start();
         <h5 class="mb-0">Thông Tin Cơ Bản</h5>
       </div>
       <div class="card-body">
-        <form id="customerForm" method="post" action="/admin/customers/<?php echo $customer['customer_id']; ?>/update">
+        <form id="customerForm" method="post" action="/admin/customers/<?php echo $customer['customer_id']; ?>/update"
+          enctype="multipart/form-data">
           <input type="hidden" id="customerId" name="customer_id" value="<?php echo $customer['customer_id'] ?? ''; ?>">
 
-          <!-- Display success or error messages if they exist -->
+          <div class="mb-3">
+            <img src="./../../../public/uploads/<?php echo $customer['avatar_url'] ?? 'default-avatar.jpg'; ?>"
+              alt="Avatar" class="img-fluid rounded-circle mb-2" style="width: 100px; height: 100px;">
+            <input type="file" class="form-control" id="customerAvatar" name="avatar_url" accept="image/*">
+          </div>
           <?php if (isset($_SESSION['success'])): ?>
           <div class="alert alert-success">
             <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
           </div>
           <?php endif; ?>
-
           <?php if (isset($_SESSION['error'])): ?>
           <div class="alert alert-danger">
             <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
