@@ -299,7 +299,8 @@ ob_start();
               <i class="fas fa-user me-1"></i> Tạo bởi: Admin
             </div>
             <div>
-              <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
+              <a href="/admin/interactions/<?php echo $interaction['interaction_id'] ?>"
+                class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
               <a href="#" class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
             </div>
           </div>

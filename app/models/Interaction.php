@@ -16,12 +16,19 @@ class Interaction {
     $interactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
     return $interactions;
   }
-  
-  public function getInteractionByCustomerId($customer_id) {
+    public function getInteractionByCustomerId($customer_id) {
     $sql = "SELECT * FROM interactions WHERE customer_id = :customer_id";
     $stmt = $this->db->prepare($sql);
     $stmt->execute(['customer_id' => $customer_id]);
     $interaction = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    return $interaction;
+  }
+  
+  public function getInteractionById($interaction_id) {
+    $sql = "SELECT * FROM interactions WHERE interaction_id = :interaction_id";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute(['interaction_id' => $interaction_id]);
+    $interaction = $stmt->fetch(\PDO::FETCH_ASSOC);
     return $interaction;
   }
 
@@ -46,5 +53,29 @@ class Interaction {
     $stmt = $this->db->prepare($sql);
     $stmt->execute(['interaction_id' => $interaction_id]);
     return $stmt->rowCount();
+  }
+
+  # cập nhật tương tác
+  public function updateInteraction($interaction_id, $data) {
+    try {
+      if (empty($data)) {
+        return false;
+      }
+      // Build the SET part of the SQL query dynamically
+      $setPart = implode(", ", array_map(function($key) {
+        return "$key = :$key";
+      }, array_keys($data)));
+
+      $sql = "UPDATE interactions SET $setPart, updated_at = NOW() WHERE interaction_id = :interaction_id";
+      $stmt = $this->db->prepare($sql);
+      $data['interaction_id'] = $interaction_id;
+      $result = $stmt->execute($data);
+
+      return $result;
+    } catch (\PDOException $e) {
+      // Log the error or handle it as needed
+      error_log("Error updating interaction: " . $e->getMessage());
+      return false;
+    }
   }
 }

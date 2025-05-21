@@ -107,8 +107,11 @@ ob_start();
               <i class="fas fa-user me-1"></i> Tạo bởi: Admin
             </div>
             <div>
-              <a href="#" class="btn btn-sm btn-outline-primary me-1"><i class="far fa-edit"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
+              <!-- Mo model edit -->
+              <a href="/admin/interactions/<?php echo $interaction['interaction_id']; ?>"
+                class="btn btn-sm btn-outline-secondary me-2"><i class="fas fa-edit"></i></a>
+              <a href="/admin/interactions/<?php echo $interaction['interaction_id']; ?>/delete"
+                class="btn btn-sm btn-outline-danger"><i class="far fa-trash-alt"></i></a>
             </div>
           </div>
         </div>
@@ -147,20 +150,21 @@ ob_start();
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form>
+        <form id="addInteractionForm" method="POST">
           <div class="mb-3">
             <label for="customerId" class="form-label">Khách Hàng <span class="text-danger">*</span></label>
-            <select class="form-select" id="customerId" required>
+            <select class="form-select" id="customerId" name="customer_id" required>
               <option value="">-- Chọn Khách Hàng --</option>
-              <option value="1">Công Ty TNHH ABC</option>
-              <option value="2">Shop XYZ</option>
-              <option value="3">Startup Tech</option>
-              <option value="4">Cửa Hàng Online</option>
+              <?php foreach ($customers as $customer) : ?>
+              <option value="<?php echo htmlspecialchars($customer['customer_id']); ?>">
+                <?php echo htmlspecialchars($customer['name']); ?>
+              </option>
+              <?php endforeach ?>
             </select>
           </div>
           <div class="mb-3">
             <label for="interactionType" class="form-label">Loại Tương Tác <span class="text-danger">*</span></label>
-            <select class="form-select" id="interactionType" required>
+            <select class="form-select" id="interactionType" name="type" required>
               <option value="">-- Chọn Loại --</option>
               <option value="Email">Email</option>
               <option value="Call">Cuộc Gọi</option>
@@ -170,21 +174,56 @@ ob_start();
           </div>
           <div class="mb-3">
             <label for="interactionDate" class="form-label">Ngày Tương Tác <span class="text-danger">*</span></label>
-            <input type="datetime-local" class="form-control" id="interactionDate" required>
+            <input type="datetime-local" class="form-control" id="interactionDate" name="date" required>
           </div>
           <div class="mb-3">
             <label for="interactionSummary" class="form-label">Nội Dung <span class="text-danger">*</span></label>
-            <textarea class="form-control" id="interactionSummary" rows="4" required></textarea>
+            <textarea class="form-control" id="interactionSummary" name="summary" rows="4" required></textarea>
           </div>
+          <button type="submit" class="btn btn-primary">Lưu</button>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-primary">Lưu Tương Tác</button>
+        <button type="submit" form="addInteractionForm" class="btn btn-primary">Lưu</button>
       </div>
     </div>
   </div>
 </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const customerSelect = document.getElementById('customerId');
+  const form = document.getElementById('addInteractionForm');
+
+  // Lắng nghe sự kiện thay đổi trên select
+  customerSelect.addEventListener('change', function() {
+    const customerId = this.value;
+    if (customerId) {
+      // Cập nhật action của form với customer_id được chọn
+      form.action = `/admin/customers/${customerId}/interaction/add`;
+    } else {
+      // Nếu không chọn khách hàng, đặt action mặc định hoặc vô hiệu hóa form
+      form.action = '#';
+    }
+  });
+
+  // Xử lý gửi form
+  form.addEventListener('submit', function(event) {
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      form.reportValidity();
+      return;
+    }
+    if (!customerSelect.value) {
+      event.preventDefault();
+      alert('Vui lòng chọn một khách hàng.');
+    }
+  });
+
+});
+</script>
 
 <style>
 .timeline {

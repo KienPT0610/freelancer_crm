@@ -60,9 +60,25 @@ if ($request == '/') {
   $customer_id = $matches[1];
   $adminController = new AdminController();
   $adminController->addInteraction($customer_id);
+
+} elseif (preg_match('#^/admin/interactions/(\d+)/delete$#', $request, $matches)) {
+  $interaction_id = $matches[1];
+  $adminController = new AdminController();
+  $adminController->deleteInteraction($interaction_id);
+
 } elseif ($request == '/admin/contacts') {
   $adminController = new AdminController();
   $adminController->contacts();
+
+} elseif (preg_match('#^/admin/interactions/(\d+)$#', $request, $matches)) {
+  $id = $matches[1];
+  $adminController = new AdminController();
+  $adminController->interactionDetail($id);
+
+} elseif (preg_match('#^/admin/interactions/(\d+)/update$#', $request, $matches)) {
+  $id = $matches[1];
+  $adminController = new AdminController();
+  $adminController->updateInteraction($id);
 
 } elseif ($request == '/admin/profile') {
   $adminController = new AdminController();

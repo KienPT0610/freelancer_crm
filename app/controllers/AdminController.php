@@ -179,7 +179,10 @@ class AdminController {
 
   public function interactions() {
     $interactionModel = new Interaction();
+    $customerModel = new Customer();
+    $customers = $customerModel->getAllCustomers();
     $interactions = $interactionModel->getAllInteractions();
+    $selectedInteraction = null;
     include __DIR__ . '/../views/admin/interactions.php';
   }
 
@@ -199,6 +202,13 @@ class AdminController {
     include __DIR__ . '/../views/admin/interactions.php';
   }
 
+  public function deleteInteraction($interaction_id) {
+    $interactionModel = new Interaction();
+    $interactionModel->deleteInteraction($interaction_id);
+    header('Location: /admin/interactions');
+    exit();
+  }
+
   public function contacts() {
     $contactModel = new Contact();
     $contacts = $contactModel->getAllContacts();
@@ -211,6 +221,75 @@ class AdminController {
 
   public function settings() {
     include __DIR__ . '/../views/admin/settings.php';
+  }
+
+  public function interactionDetail($id = null) {
+    // If no ID provided, redirect to interactions list
+    if (!$id) {
+      header('Location: /admin/interactions');
+      exit();
+    }
+    
+    // Load interaction model
+    $interactionModel = new Interaction();
+    $interaction = $interactionModel->getInteractionById($id);
+    
+    // If interaction not found, redirect to interactions list
+    if (!$interaction) {
+      $_SESSION['error'] = 'Tương tác không tồn tại.';
+      header('Location: /admin/interactions');
+      exit();
+    }
+    
+    // Get customer details
+    $customerModel = new Customer();
+    $customer = $customerModel->getCustomerById($interaction['customer_id']);
+    
+    // Get related interactions (same customer)
+    $relatedInteractions = $interactionModel->getInteractionByCustomerId($interaction['customer_id']);
+    
+    // Render the view
+    include __DIR__ . '/../views/admin/interaction-detail.php';
+  }
+
+  public function updateInteraction($id) {
+    // Check if the request method is POST
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      // If not POST, show the interaction detail page
+      $this->interactionDetail($id);
+      return;
+    }
+    
+    $interactionModel = new Interaction();
+
+    // Get POST data and filter out empty values
+    $data = [
+      'interaction_type' => $_POST['interaction_type'] ?? '',
+      'interaction_date' => $_POST['interaction_date'] ?? '',
+      'summary' => $_POST['summary'] ?? ''
+    ];
+
+    // Remove any unnecessary fields that shouldn't be in the database
+    unset($data['submit']);
+    
+    if (empty($data)) {
+      // Handle case when no data was submitted
+      header('Location: /admin/interactions/' . $id);
+      exit();
+    }
+    
+    $success = $interactionModel->updateInteraction($id, $data);
+
+    if (!$success) {
+      // Handle update failure
+      $_SESSION['error'] = 'Failed to update interaction.';
+    } else {
+      $_SESSION['success'] = 'Interaction updated successfully.';
+    }
+
+    // Redirect back to the interaction detail page
+    header('Location: /admin/interactions/' . $id);
+    exit();
   }
 
 }
