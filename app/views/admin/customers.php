@@ -153,10 +153,10 @@ ob_start();
                 <a href="/admin/customers/<?php echo $customer['customer_id']; ?>" class="btn btn-sm btn-outline-info">
                   <i class="fas fa-edit"></i>
                 </a>
-                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                  data-bs-target="#deleteCustomerModal" data-customer-id="<?php echo $customer['id']; ?>">
+                <a href="/admin/customers/<?php echo $customer['customer_id']; ?>/delete"
+                  class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa không?');">
                   <i class="fas fa-trash"></i>
-                </button>
+                </a>
               </div>
             </td>
           </tr>
@@ -191,36 +191,36 @@ ob_start();
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form>
+        <form id="addCustomerForm" action="/admin/customers/add" method="POST">
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="customerName" class="form-label">Tên Khách Hàng / Công Ty <span
                   class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="customerName" required>
+              <input type="text" class="form-control" id="customerName" name="name" required>
             </div>
             <div class="col-md-6">
               <label for="customerEmail" class="form-label">Email</label>
-              <input type="email" class="form-control" id="customerEmail">
+              <input type="email" class="form-control" id="customerEmail" name="email">
             </div>
           </div>
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="customerPhone" class="form-label">Số Điện Thoại</label>
-              <input type="text" class="form-control" id="customerPhone">
+              <input type="text" class="form-control" id="customerPhone" name="phone">
             </div>
             <div class="col-md-6">
               <label for="customerCompany" class="form-label">Tên Công Ty (nếu khác)</label>
-              <input type="text" class="form-control" id="customerCompany">
+              <input type="text" class="form-control" id="customerCompany" name="company">
             </div>
           </div>
           <div class="mb-3">
             <label for="customerAddress" class="form-label">Địa Chỉ</label>
-            <textarea class="form-control" id="customerAddress" rows="2"></textarea>
+            <textarea class="form-control" id="customerAddress" name="address" rows="2"></textarea>
           </div>
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="customerSource" class="form-label">Nguồn Khách Hàng</label>
-              <select class="form-select" id="customerSource">
+              <select class="form-select" id="customerSource" name="source">
                 <option value="">-- Chọn Nguồn --</option>
                 <option value="Referral">Giới Thiệu</option>
                 <option value="LinkedIn">LinkedIn</option>
@@ -230,7 +230,7 @@ ob_start();
             </div>
             <div class="col-md-6">
               <label for="customerStatus" class="form-label">Trạng Thái</label>
-              <select class="form-select" id="customerStatus">
+              <select class="form-select" id="customerStatus" name="status">
                 <option value="Potential">Tiềm Năng</option>
                 <option value="Active">Đang Hoạt Động</option>
                 <option value="OnHold">Tạm Dừng</option>
@@ -240,18 +240,18 @@ ob_start();
           </div>
           <div class="mb-3">
             <label for="customerTags" class="form-label">Thẻ</label>
-            <input type="text" class="form-control" id="customerTags"
+            <input type="text" class="form-control" id="customerTags" name="tags"
               placeholder="Nhập thẻ, phân cách bằng dấu phẩy (VD: vip,SME,tech)">
           </div>
           <div class="mb-3">
             <label for="customerNotes" class="form-label">Ghi Chú</label>
-            <textarea class="form-control" id="customerNotes" rows="3"></textarea>
+            <textarea class="form-control" id="customerNotes" name="notes" rows="3"></textarea>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-primary">Lưu Khách Hàng</button>
+        <button type="submit" form="addCustomerForm" class="btn btn-primary">Lưu Khách Hàng</button>
       </div>
     </div>
   </div>

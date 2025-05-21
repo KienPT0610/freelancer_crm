@@ -52,9 +52,17 @@ class Customer {
   }
 
    public function deleteCustomer($id) {
-      // $sql = "DELETE FROM customers WHERE customer_id = :id";
-      // $stmt = $this->db->prepare($sql);
-      // $stmt->execute(['id' => $id]);
+      $sql = "DELETE FROM customers WHERE customer_id = :id";
+      $stmt = $this->db->prepare($sql);
+      return $stmt->execute(['id' => $id]);
    }
+
+   public function addCustomer($data) {
+      $sql = "INSERT INTO customers (name, email, phone, company, address, notes, source, status, tags, created_at, updated_at) 
+              VALUES (:name, :email, :phone, :company, :address, :notes, :source, :status, :tags, NOW(), NOW())";
+      $stmt = $this->db->prepare($sql);
+      return $stmt->execute($data);
+   }
+
 
 }

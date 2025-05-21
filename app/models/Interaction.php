@@ -24,4 +24,27 @@ class Interaction {
     $interaction = $stmt->fetchAll(\PDO::FETCH_ASSOC);
     return $interaction;
   }
+
+  # thêm tương tác mới
+  public function addInteraction($customer_id, $interaction_type, $interaction_date, $summary) {
+    $created_by = $_SESSION['user']['user_id'] ?? 0;
+    $sql = "INSERT INTO interactions (customer_id, interaction_type, interaction_date, summary, created_by, created_at) VALUES (:customer_id, :interaction_type, :interaction_date, :summary, :created_by, NOW())";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([
+      'customer_id' => $customer_id,
+      'interaction_type' => $interaction_type,
+      'interaction_date' => $interaction_date,
+      'summary' => $summary,
+      'created_by' => $created_by
+    ]);
+    return $this->db->lastInsertId();
+  }
+
+  # xóa tương tác
+  public function deleteInteraction($interaction_id) {
+    $sql = "DELETE FROM interactions WHERE interaction_id = :interaction_id";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute(['interaction_id' => $interaction_id]);
+    return $stmt->rowCount();
+  }
 }
