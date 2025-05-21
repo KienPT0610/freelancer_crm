@@ -1,10 +1,21 @@
 <?php
 namespace App\Controllers;
-
+use App\Models\SiteContent;
+use App\Models\Project;
 use App\Models\Contact;
 
 class HomeController {
+  private $siteContentModel;
+  private $projectModel;
+  public function __construct() {
+    // Initialize any required models or services here
+    $this->siteContentModel = new SiteContent();  
+    $this->projectModel = new Project();
+  }
+
   public function index() {
+    $contents = $this->siteContentModel->getAllContent();
+    $projects = $this->projectModel->getAllProjects();
     require __DIR__ . '/../views/home/index.php';
   }
 

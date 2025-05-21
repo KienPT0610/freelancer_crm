@@ -5,6 +5,7 @@ use App\Models\Customer;
 use App\Models\Project;
 use App\Models\Contact;
 use App\Models\Interaction;
+use App\Models\SiteContent;
 
 class AdminController {
   public function index() {
@@ -309,6 +310,48 @@ class AdminController {
     // Redirect back to the interaction detail page
     header('Location: /admin/interactions/' . $id);
     exit();
+  }
+
+  public function siteContent() {
+    $siteContentModel = new SiteContent();
+    $contents = $siteContentModel->getAllContent();
+    include __DIR__ . '/../views/admin/site-content.php';
+  }
+
+  public function addSiteContent() {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      $siteContentModel = new SiteContent();
+      $data = [
+        'content_key' => $_POST['content_key'] ?? '',
+        'content_title' => $_POST['content_title'] ?? '',
+        'content_value' => $_POST['content_value'] ?? '',
+        'is_active' => $_POST['is_active'] ?? 1
+      ];
+
+      $siteContentModel->addContent($data);
+      header('Location: /admin/site-content');
+      exit();
+    }
+
+    include __DIR__ . '/../views/admin/add-site-content.php';
+  }
+
+  public function updateSiteContent($id) {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      $siteContentModel = new SiteContent();
+      $data = [
+        'content_key' => $_POST['content_key'] ?? '',
+        'content_title' => $_POST['content_title'] ?? '',
+        'content_value' => $_POST['content_value'] ?? '',
+        'is_active' => $_POST['is_active']
+      ];
+
+      $siteContentModel->updateContent($id, $data);
+      header('Location: /admin/site-content');
+      exit();
+    }
+
+    include __DIR__ . '/../views/admin/update-site-content.php';
   }
 
 }

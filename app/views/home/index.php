@@ -54,8 +54,7 @@
       <div class="row align-items-center">
         <div class="col-md-6 animate__animated animate__fadeInLeft">
           <h1 class="display-4">Chào mừng bạn đến với thế giới Blockchain!</h1>
-          <p class="lead">Tôi là Phạm Trung Kiên, một chuyên gia freelancer tận tâm, mang đến giải pháp đột phá trong
-            lĩnh vực công nghệ Blockchain. Khám phá các dịch vụ và dự án tôi đã thực hiện để thấy sự khác biệt.</p>
+          <p class="lead"><?php echo $contents[0]['content_value']; ?></p>
           <a href="#contact" class="btn btn-light btn-lg">Liên hệ ngay</a>
         </div>
         <div class="col-md-6 animate__animated animate__fadeInRight">
@@ -88,7 +87,7 @@
               <div class="d-flex align-items-center">
                 <i class="fas fa-tasks fa-2x mr-3 text-primary"></i>
                 <div>
-                  <h5 class="mb-0">[Số công việc đang làm]</h5>
+                  <h5 class="mb-0">100</h5>
                   <small class="text-muted">Đang thực hiện</small>
                 </div>
               </div>
@@ -97,7 +96,7 @@
               <div class="d-flex align-items-center">
                 <i class="fas fa-check-double fa-2x mr-3 text-success"></i>
                 <div>
-                  <h5 class="mb-0">[Số công việc đã thực hiện]</h5>
+                  <h5 class="mb-0">75</h5>
                   <small class="text-muted">Đã hoàn thành</small>
                 </div>
               </div>
@@ -106,7 +105,7 @@
               <div class="d-flex align-items-center">
                 <i class="fas fa-trophy fa-2x mr-3 text-warning"></i>
                 <div>
-                  <h5 class="mb-0">[Số dự án thành công]</h5>
+                  <h5 class="mb-0">74</h5>
                   <small class="text-muted">Thành công</small>
                 </div>
               </div>
@@ -125,8 +124,8 @@
           <div class="card shadow-sm border-left-primary border-left-thick h-100">
             <div class="card-body">
               <i class="fas fa-code fa-3x mb-2 text-primary"></i>
-              <h5 class="card-title">[Tên Dịch Vụ 1]</h5>
-              <p class="card-text">[Mô tả ngắn gọn về dịch vụ 1].</p>
+              <h5 class="card-title"><?php echo $contents[1]['content_value']; ?></h5>
+              <p class="card-text"><?php echo $contents[2]['content_value']; ?></p>
               <a href="#" class="btn btn-outline-primary btn-sm">Xem chi tiết <i
                   class="fas fa-arrow-right ml-1"></i></a>
             </div>
@@ -136,8 +135,8 @@
           <div class="card shadow-sm border-left-success border-left-thick h-100">
             <div class="card-body">
               <i class="fas fa-paint-brush fa-3x mb-2 text-success"></i>
-              <h5 class="card-title">[Tên Dịch Vụ 2]</h5>
-              <p class="card-text">[Mô tả ngắn gọn về dịch vụ 2].</p>
+              <h5 class="card-title"><?php echo $contents[3]['content_value']; ?></h5>
+              <p class="card-text"><?php echo $contents[4]['content_value']; ?></p>
               <a href="#" class="btn btn-outline-success btn-sm">Xem chi tiết <i
                   class="fas fa-arrow-right ml-1"></i></a>
             </div>
@@ -147,8 +146,8 @@
           <div class="card shadow-sm border-left-info border-left-thick h-100">
             <div class="card-body">
               <i class="fas fa-chart-bar fa-3x mb-2 text-info"></i>
-              <h5 class="card-title">[Tên Dịch Vụ 3]</h5>
-              <p class="card-text">[Mô tả ngắn gọn về dịch vụ 3].</p>
+              <h5 class="card-title"><?php echo $contents[5]['content_value']; ?></h5>
+              <p class="card-text"><?php echo $contents[6]['content_value']; ?></p>
               <a href="#" class="btn btn-outline-info btn-sm">Xem chi tiết <i class="fas fa-arrow-right ml-1"></i></a>
             </div>
           </div>
@@ -161,26 +160,20 @@
     <div class="container">
       <h2 class="text-center mb-4 animate__animated animate__fadeInUp">Dự Án Nổi Bật</h2>
       <div class="row">
+        <?php foreach (array_slice($projects, 0, 2) as $project): ?>
         <div class="col-md-6 mb-4 animate__animated animate__fadeInLeft animate__delay-0-5s">
           <div class="card shadow-sm">
-            <img src="./../../../public/assets/images/project-1.jpg" alt="Dự án 1" class="card-img-top">
+            <img src="./../../../public/assets/images/project-1.jpg" alt="<?php echo $project['name']; ?>"
+              class="card-img-top">
             <div class="card-body">
-              <h5 class="card-title">[Tên Dự Án 1]</h5>
-              <p class="card-text">[Mô tả ngắn gọn về dự án 1].</p>
-              <a href="#" class="btn btn-primary btn-sm">Xem dự án <i class="fas fa-external-link-alt ml-1"></i></a>
+              <h5 class="card-title"><?php echo $project['name']; ?></h5>
+              <p class="card-text"><?php echo $project['description']; ?></p>
+              <a href="<?php echo $project['link']; ?>" class="btn btn-primary btn-sm">Xem dự án <i
+                  class="fas fa-external-link-alt ml-1"></i></a>
             </div>
           </div>
         </div>
-        <div class="col-md-6 mb-4 animate__animated animate__fadeInRight animate__delay-0-5s">
-          <div class="card shadow-sm">
-            <img src="./../../../public/assets/images/project-2.jpg" alt="Dự án 2" class="card-img-top">
-            <div class="card-body">
-              <h5 class="card-title">[Tên Dự Án 2]</h5>
-              <p class="card-text">[Mô tả ngắn gọn về dự án 2].</p>
-              <a href="#" class="btn btn-primary btn-sm">Xem dự án <i class="fas fa-external-link-alt ml-1"></i></a>
-            </div>
-          </div>
-        </div>
+        <?php endforeach; ?>
       </div>
       <div class="text-center mt-3 animate__animated animate__fadeInUp animate__delay-1s">
         <a href="#" class="btn btn-outline-secondary">Xem tất cả dự án <i class="fas fa-folder-open ml-1"></i></a>
@@ -227,7 +220,7 @@
   <section id="contact" class="py-5 bg-light">
     <div class="container">
       <h2 class="text-center mb-4 animate__animated animate__fadeInUp">Liên Hệ Với Tôi</h2>
-      
+
       <?php if (isset($_SESSION['success'])): ?>
       <div class="alert alert-success alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
         <i class="fas fa-check-circle mr-2"></i> <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
@@ -236,7 +229,7 @@
         </button>
       </div>
       <?php endif; ?>
-      
+
       <?php if (isset($_SESSION['error'])): ?>
       <div class="alert alert-danger alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
         <i class="fas fa-exclamation-triangle mr-2"></i> <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
@@ -245,34 +238,38 @@
         </button>
       </div>
       <?php endif; ?>
-      
+
       <div class="row">
         <div class="col-md-6 animate__animated animate__fadeInLeft">
           <h3>Gửi tin nhắn cho tôi</h3>
           <form action="/contact" method="post">
             <div class="form-group">
               <label for="name">Tên của bạn:</label>
-              <input type="text" class="form-control" id="name" name="name" value="<?php echo $_SESSION['form_data']['name'] ?? ''; ?>" required>
+              <input type="text" class="form-control" id="name" name="name"
+                value="<?php echo $_SESSION['form_data']['name'] ?? ''; ?>" required>
               <?php if (isset($_SESSION['form_errors']['name'])): ?>
-                <small class="text-danger"><?php echo $_SESSION['form_errors']['name']; ?></small>
+              <small class="text-danger"><?php echo $_SESSION['form_errors']['name']; ?></small>
               <?php endif; ?>
             </div>
             <div class="form-group">
               <label for="email">Địa chỉ email:</label>
-              <input type="email" class="form-control" id="email" name="email" value="<?php echo $_SESSION['form_data']['email'] ?? ''; ?>" required>
+              <input type="email" class="form-control" id="email" name="email"
+                value="<?php echo $_SESSION['form_data']['email'] ?? ''; ?>" required>
               <?php if (isset($_SESSION['form_errors']['email'])): ?>
-                <small class="text-danger"><?php echo $_SESSION['form_errors']['email']; ?></small>
+              <small class="text-danger"><?php echo $_SESSION['form_errors']['email']; ?></small>
               <?php endif; ?>
             </div>
             <div class="form-group">
               <label for="phone">Số điện thoại:</label>
-              <input type="tel" class="form-control" id="phone" name="phone" value="<?php echo $_SESSION['form_data']['phone'] ?? ''; ?>">
+              <input type="tel" class="form-control" id="phone" name="phone"
+                value="<?php echo $_SESSION['form_data']['phone'] ?? ''; ?>">
             </div>
             <div class="form-group">
               <label for="message">Lời nhắn:</label>
-              <textarea class="form-control" id="message" name="message" rows="5" required><?php echo $_SESSION['form_data']['message'] ?? ''; ?></textarea>
+              <textarea class="form-control" id="message" name="message" rows="5"
+                required><?php echo $_SESSION['form_data']['message'] ?? ''; ?></textarea>
               <?php if (isset($_SESSION['form_errors']['message'])): ?>
-                <small class="text-danger"><?php echo $_SESSION['form_errors']['message']; ?></small>
+              <small class="text-danger"><?php echo $_SESSION['form_errors']['message']; ?></small>
               <?php endif; ?>
             </div>
             <button type="submit" class="btn btn-primary btn-block btn-lg">Gửi tin nhắn <i
