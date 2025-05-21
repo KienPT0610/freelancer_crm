@@ -101,7 +101,10 @@ ob_start();
             </td>
             <td>
               <div class="d-flex align-items-center">
-                <div class="avatar-initial rounded-circle bg-primary text-white me-2">CT</div>
+                <div class="avatar-initial rounded-circle bg-primary text-white me-2">
+                  <img src="./../../../public/uploads/<?php echo $customer['avatar_url'] ?? 'default-avatar.jpg'; ?>"
+                    alt="Avatar" class="rounded-circle" width="40" height="40">
+                </div>
                 <div>
                   <div class="fw-bold"><?php echo $customer['name']; ?></div>
                   <div class="small text-muted"><?php echo $customer['created_at']; ?></div>
