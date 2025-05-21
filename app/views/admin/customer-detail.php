@@ -155,7 +155,7 @@ ob_start();
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center px-0">
             <span>Tương Tác Cuối</span>
-            <span><?php echo $interactions[0]['created_at']; ?></span>
+            <span><?php echo $interactions[0]['created_at'] ?? ''; ?></span>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center px-0">
             <span>Ngày Tham Gia</span>
@@ -324,7 +324,8 @@ ob_start();
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="addInteractionForm">
+        <form id="addInteractionForm" action="/admin/customers/<?php echo $customer['customer_id']; ?>/interaction/add"
+          method="post">
           <input type="hidden" name="customerId" value="<?php echo $customer['id'] ?? '1'; ?>">
           <div class="mb-3">
             <label for="interactionType" class="form-label">Loại Tương Tác <span class="text-danger">*</span></label>
@@ -335,10 +336,6 @@ ob_start();
               <option value="Meeting">Cuộc Họp</option>
               <option value="Note">Ghi Chú</option>
             </select>
-          </div>
-          <div class="mb-3">
-            <label for="interactionTitle" class="form-label">Tiêu Đề <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="interactionTitle" name="title" required>
           </div>
           <div class="mb-3">
             <label for="interactionDate" class="form-label">Ngày Tương Tác <span class="text-danger">*</span></label>
@@ -352,7 +349,8 @@ ob_start();
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-primary" id="saveInteractionBtn">Lưu Tương Tác</button>
+        <button type="submit" form="addInteractionForm" class="btn btn-primary" id="saveInteractionBtn">Lưu Tương
+          Tác</button>
       </div>
     </div>
   </div>
@@ -377,7 +375,8 @@ ob_start();
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xác Nhận Xóa</button>
+        <a href="/admin/customers/<?php echo $customer['customer_id']; ?>/delete" class="btn btn-danger"
+          id="confirmDeleteBtn">Xóa Khách Hàng</a>
       </div>
     </div>
   </div>
@@ -491,11 +490,10 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    alert('Đã thêm tương tác mới!');
+    // Submit form
+    form.submit();
 
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addInteractionModal'));
-    modal.hide();
+    alert('Đã thêm tương tác mới!');
   });
 
   // Delete Customer Button

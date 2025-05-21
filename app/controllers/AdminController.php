@@ -81,6 +81,44 @@ class AdminController {
     include __DIR__ . '/../views/admin/customer-detail.php';
   }
 
+  public function addCustomer() {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $customerModel = new Customer();
+        // Tạo mảng $data với tất cả các khóa cần thiết
+        $data = [
+            'name' => $_POST['name'] ?? '',
+            'email' => $_POST['email'] ?? '',
+            'phone' => $_POST['phone'] ?? '',
+            'company' => $_POST['company'] ?? '',
+            'address' => $_POST['address'] ?? '',
+            'notes' => $_POST['notes'] ?? '',
+            'source' => $_POST['source'] ?? '',
+            'status' => $_POST['status'] ?? '',
+            'tags' => $_POST['tags'] ?? ''
+        ];
+
+        // Kiểm tra trường bắt buộc
+        if (empty($data['name'])) {
+            $_SESSION['error'] = "Tên khách hàng là bắt buộc.";
+            header('Location: /admin/customers/add');
+            exit();
+        }
+
+        try {
+            $customerModel->addCustomer($data);
+            $_SESSION['success'] = "Thêm khách hàng thành công!";
+            header('Location: /admin/customers');
+            exit();
+        } catch (\PDOException $e) {
+            $_SESSION['error'] = "Lỗi khi thêm khách hàng: " . $e->getMessage();
+            header('Location: /admin/customers/add');
+            exit();
+        }
+    }
+
+    include __DIR__ . '/../views/admin/customers.php';
+}
+
   public function updateCustomer($id) {
     // Check if the request method is POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -119,6 +157,20 @@ class AdminController {
     exit();
   }
 
+  public function deleteCustomer($id) {
+    $customerModel = new Customer();
+    $success = $customerModel->deleteCustomer($id);
+    
+    if ($success) {
+      $_SESSION['success'] = 'Customer deleted successfully.';
+    } else {
+      $_SESSION['error'] = 'Failed to delete customer.';
+    }
+    
+    header('Location: /admin/customers');
+    exit();
+  }
+
   public function projects() {
     $projectModel = new Project();
     $projects = $projectModel->getAllProjects();
@@ -128,6 +180,22 @@ class AdminController {
   public function interactions() {
     $interactionModel = new Interaction();
     $interactions = $interactionModel->getAllInteractions();
+    include __DIR__ . '/../views/admin/interactions.php';
+  }
+
+  public function addInteraction($customer_id) {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      $interactionModel = new Interaction();
+      $interactionModel->addInteraction(
+        $customer_id,
+        $_POST['type'] ?? '',
+        $_POST['date'] ?? '',
+        $_POST['summary'] ?? ''
+      );
+      header('Location: /admin/customers/' . $customer_id);
+      exit();
+    }
+    
     include __DIR__ . '/../views/admin/interactions.php';
   }
 

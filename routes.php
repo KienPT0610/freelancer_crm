@@ -31,6 +31,9 @@ if ($request == '/') {
 } elseif ($request == '/admin/customers') {
   $adminController = new AdminController();
   $adminController->customers();
+} elseif ($request == '/admin/customers/add') {
+  $adminController = new AdminController();
+  $adminController->addCustomer();
 
 } elseif (preg_match('#^/admin/customers/(\d+)$#', $request, $matches)) {
   $id = $matches[1];
@@ -41,6 +44,10 @@ if ($request == '/') {
   $id = $matches[1]; 
   $adminController = new AdminController();
   $adminController->updateCustomer($id);
+} elseif (preg_match('#^/admin/customers/(\d+)/delete$#', $request, $matches)) {
+  $id = $matches[1];
+  $adminController = new AdminController();
+  $adminController->deleteCustomer($id);
 
 } elseif ($request == '/admin/projects') {
   $adminController = new AdminController();
@@ -49,7 +56,10 @@ if ($request == '/') {
 } elseif ($request == '/admin/interactions') {
   $adminController = new AdminController();
   $adminController->interactions();
-
+} elseif (preg_match('#^/admin/customers/(\d+)/interaction/add#', $request, $matches)) {
+  $customer_id = $matches[1];
+  $adminController = new AdminController();
+  $adminController->addInteraction($customer_id);
 } elseif ($request == '/admin/contacts') {
   $adminController = new AdminController();
   $adminController->contacts();
