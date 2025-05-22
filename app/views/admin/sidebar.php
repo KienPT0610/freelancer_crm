@@ -36,6 +36,11 @@
       <span>Trang chủ</span>
     </a>
 
+    <a class="sidebar-item <?php echo $active_page == 'site_content' ? 'active' : ''; ?>" href="/admin/site-content">
+      <i class="fas fa-chart-bar"></i>
+      <span>Site content</span>
+    </a>
+
     <div class="sidebar-heading">Cài Đặt</div>
     <a class="sidebar-item <?php echo $active_page == 'settings' ? 'active' : ''; ?>" href="/admin/settings">
       <i class="fas fa-cog"></i>
