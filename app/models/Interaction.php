@@ -34,7 +34,7 @@ class Interaction {
 
   # thêm tương tác mới
   public function addInteraction($customer_id, $interaction_type, $interaction_date, $summary) {
-    $created_by = $_SESSION['user']['user_id'] ?? 0;
+    $created_by = $_SESSION['user']['user_id'] ?? 1;
     $sql = "INSERT INTO interactions (customer_id, interaction_type, interaction_date, summary, created_by, created_at) VALUES (:customer_id, :interaction_type, :interaction_date, :summary, :created_by, NOW())";
     $stmt = $this->db->prepare($sql);
     $stmt->execute([

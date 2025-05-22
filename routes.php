@@ -101,6 +101,9 @@ if ($request == '/') {
   $id = $matches[1];
   $adminController = new AdminController();
   $adminController->deleteSiteContent($id);
+} elseif ($request == '/admin/chatbot') {
+  $adminController = new AdminController();
+  $adminController->chatbot();
 } elseif ($request == '/logout') {
   $adminController = new AdminController();
   $adminController->logout();

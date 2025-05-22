@@ -8,6 +8,18 @@ use App\Models\Interaction;
 use App\Models\SiteContent;
 
 class AdminController {
+  private $userModel;
+  private $customerModel;
+  private $projectModel;
+  private $interactionModel;
+  private $contactModel;
+  public function __construct() {
+    $this->userModel = new User();
+    $this->customerModel = new Customer();
+    $this->projectModel = new Project();
+    $this->interactionModel = new Interaction();
+    $this->contactModel = new Contact();
+  }
   public function index() {
     // Nếu đã login thì redirect về home
     if (isset($_SESSION['user'])) {
@@ -48,6 +60,11 @@ class AdminController {
   }
 
   public function dashboard() {
+    // get all model
+    $customers = $this->customerModel->getAllCustomers();
+    $projects = $this->projectModel->getAllProjects();
+    $interactions = $this->interactionModel->getAllInteractions();
+    $contacts = $this->contactModel->getAllContacts();
     include __DIR__ . '/../views/admin/dashboard.php';
   }
 
@@ -360,6 +377,9 @@ class AdminController {
     header('Location: /admin/site-content');
     exit();
   }
-}
 
-?>
+  public function chatbot() {
+    // Render the chatbot view
+    include __DIR__ . '/../views/admin/chatbot.php';
+  }
+}
