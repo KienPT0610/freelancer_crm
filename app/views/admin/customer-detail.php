@@ -75,30 +75,11 @@ ob_start();
             </div>
           </div>
 
-          <div class="mb-3">
-            <label for="customerAddress" class="form-label">Địa Chỉ</label>
-            <textarea class="form-control" id="customerAddress" name="address"
-              rows="2"><?php echo $customer['address'] ?? '123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh'; ?></textarea>
-          </div>
-
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="customerSource" class="form-label">Nguồn Khách Hàng</label>
-              <select class="form-select" id="customerSource" name="source">
-                <option value="">-- Chọn Nguồn --</option>
-                <option value="Referral"
-                  <?php echo (isset($customer['source']) && $customer['source'] === 'Referral') ? 'selected' : ''; ?>>
-                  Giới Thiệu</option>
-                <option value="LinkedIn"
-                  <?php echo (isset($customer['source']) && $customer['source'] === 'LinkedIn') ? 'selected' : ''; ?>>
-                  LinkedIn</option>
-                <option value="Website"
-                  <?php echo (isset($customer['source']) && $customer['source'] === 'Website') ? 'selected' : ''; ?>>
-                  Website</option>
-                <option value="Other"
-                  <?php echo (isset($customer['source']) && $customer['source'] === 'Other') ? 'selected' : ''; ?>>Khác
-                </option>
-              </select>
+              <label for="customerBirthday" class="form-label">Ngày Sinh</label>
+              <input type="date" class="form-control" id="customerBirthday" name="birthday"
+                value="<?php echo $customer['birthday'] ? date('Y-m-d', strtotime($customer['birthday'])) : ''; ?>">
             </div>
             <div class="col-md-6">
               <label for="customerStatus" class="form-label">Trạng Thái</label>

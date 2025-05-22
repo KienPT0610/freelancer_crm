@@ -3,7 +3,265 @@
 $page_title = 'Chatbot';
 $active_page = 'chatbot';
 
-// Start output buffering to capture content
+// Tạo session nếu chưa được khởi tạo
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+// Khởi tạo các model cần thiết
+require_once __DIR__ . '/../../models/Customer.php';
+require_once __DIR__ . '/../../models/Interaction.php';
+
+// Handle clearing chat history
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["clear_chat"])) {
+    // Keep only the initial system message
+    $system_message = isset($_SESSION['chat_messages'][0]) ? $_SESSION['chat_messages'][0] : [
+        "role" => "system",
+        "content" => "Bạn là trợ lý ảo CRM, giúp người dùng quản lý khách hàng, dự án và tương tác. Bạn có thể:
+1. Hiển thị danh sách khách hàng
+2. Thêm khách hàng mới với các thông tin: tên, email, số điện thoại, công ty, địa chỉ, nguồn, trạng thái, thẻ và ghi chú
+3. Xem chi tiết khách hàng
+4. Cập nhật thông tin khách hàng
+5. Xóa khách hàng
+6. Thêm tương tác với khách hàng
+7. Xem lịch sử tương tác với khách hàng
+
+Khi người dùng yêu cầu thực hiện các thao tác trên, bạn sẽ phân tích yêu cầu và thực hiện các bước tương ứng."
+    ];
+    $_SESSION['chat_messages'] = [$system_message];
+    
+    // Return success response and exit
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true]);
+    exit;
+}
+
+// Initialize chat messages in session if not set
+if (!isset($_SESSION['chat_messages'])) {
+    $_SESSION['chat_messages'] = [
+        ["role" => "system", "content" => "Bạn là trợ lý ảo CRM, giúp người dùng quản lý khách hàng, dự án và tương tác. Bạn có thể:
+1. Hiển thị danh sách khách hàng
+2. Thêm khách hàng mới với các thông tin: tên, email, số điện thoại, công ty, địa chỉ, nguồn, trạng thái, thẻ và ghi chú
+3. Xem chi tiết khách hàng
+4. Cập nhật thông tin khách hàng
+5. Xóa khách hàng
+6. Thêm tương tác với khách hàng
+7. Xem lịch sử tương tác với khách hàng
+
+Khi người dùng yêu cầu thực hiện các thao tác trên, bạn sẽ phân tích yêu cầu và thực hiện các bước tương ứng."]
+    ];
+}
+
+// API key for Gemini
+$gemini_api_key = 'AIzaSyCwcZHvmPyzblpwh_LCK2p3GFTbcv2vdZA'; // Replace with your actual Gemini API key
+
+// Process chat request
+$chat_reply = '';
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["user_message"])) {
+    $user_message = trim($_POST["user_message"]);
+    
+    if (!empty($user_message)) {
+        // Add user message to history
+        $_SESSION['chat_messages'][] = ["role" => "user", "content" => $user_message];
+        
+        // Limit chat history to prevent excessive token usage
+        if (count($_SESSION['chat_messages']) > 10) {
+            $system_message = $_SESSION['chat_messages'][0];
+            $_SESSION['chat_messages'] = array_slice($_SESSION['chat_messages'], -9);
+            array_unshift($_SESSION['chat_messages'], $system_message);
+        }
+
+        // Xử lý các lệnh đặc biệt trước khi gọi API
+        $customerModel = new \App\Models\Customer();
+        $interactionModel = new \App\Models\Interaction();
+        
+        // Xử lý hiển thị danh sách khách hàng
+        if (strpos(strtolower($user_message), 'hiển thị danh sách khách hàng') !== false) {
+            // Kiểm tra xem có dữ liệu khách hàng được truyền vào không
+            if (!isset($_SESSION['customer_list']) || empty($_SESSION['customer_list'])) {
+                $chat_reply = "Hiện tại chưa có dữ liệu khách hàng để hiển thị.";
+                return;
+            }
+
+            $customers = $_SESSION['customer_list'];
+            $chat_reply = "Danh sách khách hàng:\n\n";
+            
+            foreach ($customers as $index => $customer) {
+                $name = $customer['name'] ?? 'N/A';
+                $email = $customer['email'] ?? 'N/A';
+                $phone = $customer['phone'] ?? 'N/A';
+                $company = $customer['company'] ?? 'N/A';
+                $birthday = $customer['birthday'] ? date('d/m/Y', strtotime($customer['birthday'])) : 'N/A';
+                
+                $chat_reply .= ($index + 1) . ". {$name}\n";
+                $chat_reply .= "   - Email: {$email}\n";
+                $chat_reply .= "   - Số điện thoại: {$phone}\n";
+                $chat_reply .= "   - Công ty: {$company}\n";
+                $chat_reply .= "   - Ngày sinh: {$birthday}\n\n";
+            }
+            
+            $totalCustomers = count($customers);
+            $chat_reply .= "Tổng số khách hàng: {$totalCustomers}\n\n";
+            $chat_reply .= "Bạn có thể:\n";
+            $chat_reply .= "1. Tìm kiếm khách hàng theo tên\n";
+            $chat_reply .= "2. Lọc khách hàng theo công ty\n";
+            $chat_reply .= "3. Xem chi tiết thông tin khách hàng";
+        }
+        // Xử lý thêm khách hàng mới
+        elseif (strpos(strtolower($user_message), 'thêm khách hàng') !== false) {
+            // Kiểm tra xem có dữ liệu khách hàng mới được truyền vào không
+            if (!isset($_SESSION['new_customer']) || empty($_SESSION['new_customer'])) {
+                $chat_reply = "Vui lòng cung cấp thông tin khách hàng theo định dạng:\n";
+                $chat_reply .= "Tên: [tên khách hàng]\n";
+                $chat_reply .= "Email: [email]\n";
+                $chat_reply .= "Số điện thoại: [số điện thoại]\n";
+                $chat_reply .= "Công ty: [tên công ty]\n";
+                $chat_reply .= "Ngày sinh: [ngày/tháng/năm]";
+                return;
+            }
+
+            $newCustomer = $_SESSION['new_customer'];
+            $birthday = $newCustomer['birthday'] ? date('d/m/Y', strtotime($newCustomer['birthday'])) : 'N/A';
+            
+            $chat_reply = "Đã thêm khách hàng mới:\n";
+            $chat_reply .= "Tên: {$newCustomer['name']}\n";
+            $chat_reply .= "Email: {$newCustomer['email']}\n";
+            $chat_reply .= "Số điện thoại: {$newCustomer['phone']}\n";
+            $chat_reply .= "Công ty: {$newCustomer['company']}\n";
+            $chat_reply .= "Ngày sinh: {$birthday}";
+            
+            // Xóa dữ liệu khách hàng mới khỏi session
+            unset($_SESSION['new_customer']);
+        }
+        // Xử lý xem chi tiết khách hàng
+        elseif (preg_match('/xem chi tiết khách hàng\s+(.+)/i', $user_message, $matches)) {
+            $customerName = trim($matches[1]);
+            $customers = $_SESSION['customer_list'] ?? [];
+            $found = false;
+            
+            foreach ($customers as $customer) {
+                if (stripos($customer['name'], $customerName) !== false) {
+                    $found = true;
+                    $birthday = $customer['birthday'] ? date('d/m/Y', strtotime($customer['birthday'])) : 'N/A';
+                    
+                    $chat_reply = "Thông tin chi tiết khách hàng:\n\n";
+                    $chat_reply .= "Tên: {$customer['name']}\n";
+                    $chat_reply .= "Email: {$customer['email']}\n";
+                    $chat_reply .= "Số điện thoại: {$customer['phone']}\n";
+                    $chat_reply .= "Công ty: {$customer['company']}\n";
+                    $chat_reply .= "Ngày sinh: {$birthday}\n";
+                    $chat_reply .= "Địa chỉ: {$customer['address']}\n";
+                    $chat_reply .= "Nguồn: {$customer['source']}\n";
+                    $chat_reply .= "Trạng thái: {$customer['status']}\n";
+                    $chat_reply .= "Thẻ: {$customer['tags']}\n";
+                    $chat_reply .= "Ghi chú: {$customer['notes']}";
+                    break;
+                }
+            }
+            
+            if (!$found) {
+                $chat_reply = "Không tìm thấy khách hàng với tên: {$customerName}";
+            }
+        }
+        // Nếu không phải lệnh đặc biệt, sử dụng Gemini API
+        else {
+            // Chuẩn bị tin nhắn theo định dạng của Gemini API
+            $messages = [];
+            if (is_array($_SESSION['chat_messages'])) {
+                foreach ($_SESSION['chat_messages'] as $message) {
+                    if (is_array($message) && isset($message['role']) && isset($message['content'])) {
+                        $role = $message['role'];
+                        // Chuyển đổi 'role' từ định dạng của chúng ta sang định dạng của Gemini
+                        if ($role === 'assistant') $role = 'model';
+                        if ($role === 'system') $role = 'user'; // Gemini không có role system nên chuyển thành user
+                        
+                        $messages[] = [
+                            'role' => $role,
+                            'parts' => [
+                                ['text' => $message['content']]
+                            ]
+                        ];
+                    }
+                }
+            }
+
+            // Định dạng dữ liệu theo yêu cầu của Gemini API
+            $data = json_encode([
+                'contents' => $messages,
+                'generationConfig' => [
+                    'temperature' => 0.7,
+                    'maxOutputTokens' => 2048,
+                    'topP' => 0.8,
+                    'topK' => 40
+                ]
+            ]);
+
+            // Thiết lập cURL cho Gemini API
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=$gemini_api_key");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Content-Type: application/json"
+            ]);
+            
+            // Thiết lập timeout và thử lại
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            
+            // Thực hiện yêu cầu API
+            $response = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($http_code == 200) {
+                $json = json_decode($response, true);
+                if (isset($json['candidates']) && isset($json['candidates'][0]['content']['parts'][0]['text'])) {
+                    $chat_reply = $json['candidates'][0]['content']['parts'][0]['text'];
+                } elseif (isset($json['error'])) {
+                    $chat_reply = "Lỗi Gemini API: " . $json['error']['message'];
+                } else {
+                    $chat_reply = "Không thể phân tích phản hồi từ API. Định dạng JSON không khớp với cấu trúc mong đợi.";
+                }
+            } else {
+                // Xử lý lỗi API chi tiết
+                $error_message = "Lỗi từ Gemini API - HTTP Code: " . $http_code;
+                
+                if (!empty($error)) {
+                    $error_message .= "<br>Chi tiết lỗi cURL: " . htmlspecialchars($error);
+                }
+                
+                if (!empty($response)) {
+                    $response_data = json_decode($response, true);
+                    if (json_last_error() === JSON_ERROR_NONE && isset($response_data['error'])) {
+                        $error_message .= "<br>Thông báo lỗi: " . htmlspecialchars($response_data['error']['message'] ?? json_encode($response_data['error']));
+                    } else {
+                        $error_message .= "<br>Phản hồi từ server: " . htmlspecialchars($response);
+                    }
+                }
+                
+                // Ghi log lỗi
+                error_log("Gemini API Error: HTTP Code $http_code, Error: $error, Response: $response");
+                
+                $chat_reply = $error_message;
+            }
+        }
+        
+        // Save bot response to history
+        $_SESSION['chat_messages'][] = ["role" => "assistant", "content" => $chat_reply];
+        
+        // Return JSON response for AJAX
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'chat_reply' => $chat_reply]);
+            exit;
+        }
+    }
+}
+
+// Start output buffering
 ob_start();
 ?>
 
@@ -27,7 +285,7 @@ ob_start();
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
           <i class="fas fa-robot me-2"></i> Assistant CRM
-          <span class="badge bg-success ms-2">Online</span>
+          <span class="badge bg-success ms-2" id="chatbotOnlineStatus">Online</span>
         </h5>
         <div>
           <button class="btn btn-sm btn-outline-secondary me-2" id="clearChatBtn">
@@ -55,11 +313,18 @@ ob_start();
             </div>
           </div>
 
-          <!-- Sample User Message -->
+          <?php 
+          // Display chat history, skipping the system message
+          if (isset($_SESSION['chat_messages']) && count($_SESSION['chat_messages']) > 1) {
+              for ($i = 1; $i < count($_SESSION['chat_messages']); $i++) {
+                  $message = $_SESSION['chat_messages'][$i];
+                  if ($message['role'] == 'user') {
+          ?>
+          <!-- User Message -->
           <div class="chat-message user-message mb-3">
             <div class="message-content">
               <div class="message-bubble">
-                <p class="mb-0">Tôi muốn biết thông tin về khách hàng có mã KH001</p>
+                <p class="mb-0"><?php echo nl2br(htmlspecialchars($message['content'])); ?></p>
               </div>
               <div class="message-info">
                 <small class="text-muted">Hôm nay, <?php echo date('H:i'); ?></small>
@@ -69,64 +334,33 @@ ob_start();
               <img src="/public/assets/images/avatar.png" alt="User" class="rounded-circle">
             </div>
           </div>
-
-          <!-- Sample Bot Response with data -->
+          <?php } elseif ($message['role'] == 'assistant') { ?>
+          <!-- Bot Response -->
           <div class="chat-message bot-message mb-3">
             <div class="message-avatar">
               <img src="/public/assets/images/logo.png" alt="Bot" class="rounded-circle">
             </div>
             <div class="message-content">
               <div class="message-bubble">
-                <p class="mb-0">Đây là thông tin khách hàng có mã KH001:</p>
-                <div class="data-card mt-2">
-                  <div class="data-card-header">
-                    <h6 class="mb-0">Công Ty TNHH ABC</h6>
-                    <span class="badge bg-success">Đang Hoạt Động</span>
-                  </div>
-                  <div class="data-card-body">
-                    <p><strong>Email:</strong> contact@abc.com</p>
-                    <p><strong>Điện thoại:</strong> 0901234567</p>
-                    <p><strong>Địa chỉ:</strong> 123 Đường ABC, Q.1, TP.HCM</p>
-                    <p><strong>Dự án:</strong> 2 dự án đang hoạt động</p>
-                  </div>
-                  <div class="data-card-footer">
-                    <a href="/admin/customers/1" class="btn btn-sm btn-outline-primary">Xem Chi Tiết</a>
-                  </div>
-                </div>
+                <p class="mb-0"><?php echo nl2br(htmlspecialchars($message['content'])); ?></p>
               </div>
               <div class="message-info">
                 <small class="text-muted">Hôm nay, <?php echo date('H:i'); ?></small>
               </div>
             </div>
           </div>
-
-          <!-- Sample Bot Response with options -->
-          <div class="chat-message bot-message mb-3">
-            <div class="message-avatar">
-              <img src="/public/assets/images/logo.png" alt="Bot" class="rounded-circle">
-            </div>
-            <div class="message-content">
-              <div class="message-bubble">
-                <p class="mb-0">Bạn muốn thực hiện thao tác nào với khách hàng này?</p>
-                <div class="option-buttons mt-2">
-                  <button class="btn btn-sm btn-outline-primary mb-1 me-1">Xem Chi Tiết</button>
-                  <button class="btn btn-sm btn-outline-success mb-1 me-1">Tạo Tương Tác</button>
-                  <button class="btn btn-sm btn-outline-info mb-1 me-1">Tạo Dự Án</button>
-                  <button class="btn btn-sm btn-outline-warning mb-1">Gửi Email</button>
-                </div>
-              </div>
-              <div class="message-info">
-                <small class="text-muted">Hôm nay, <?php echo date('H:i'); ?></small>
-              </div>
-            </div>
-          </div>
+          <?php 
+                  }
+              }
+          }
+          ?>
         </div>
       </div>
       <div class="card-footer">
         <form id="chatForm" class="chat-input-form">
           <div class="input-group">
-            <input type="text" class="form-control" id="messageInput" placeholder="Nhập câu hỏi hoặc yêu cầu..."
-              autocomplete="off">
+            <input type="text" class="form-control" id="messageInput" name="user_message"
+              placeholder="Nhập câu hỏi hoặc yêu cầu..." autocomplete="off" required>
             <button class="btn btn-primary" type="submit">
               <i class="fas fa-paper-plane"></i>
             </button>
@@ -184,9 +418,9 @@ ob_start();
           <h6><i class="fas fa-info-circle text-primary me-2"></i> Trạng Thái Chatbot</h6>
           <div class="d-flex align-items-center mt-2">
             <div class="progress flex-grow-1 me-2" style="height: 8px;">
-              <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+              <div class="progress-bar bg-success" id="chatbotStatusBar" role="progressbar" style="width: 100%"></div>
             </div>
-            <span class="badge bg-success">Hoạt động tốt</span>
+            <span class="badge bg-success" id="chatbotStatusBadge">Hoạt động tốt</span>
           </div>
         </li>
         <li class="list-group-item">
@@ -223,364 +457,98 @@ ob_start();
 
 <!-- Settings Modal -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="settingsModalLabel">Cài Đặt Chatbot</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general"
-              type="button" role="tab">
-              Cài Đặt Chung
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="knowledge-tab" data-bs-toggle="tab" data-bs-target="#knowledge" type="button"
-              role="tab">
-              Cơ Sở Kiến Thức
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance" type="button"
-              role="tab">
-              Giao Diện
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab">
-              Nhật Ký
-            </button>
-          </li>
-        </ul>
-        <div class="tab-content p-3 border border-top-0 rounded-bottom" id="settingsTabsContent">
-          <!-- General Settings -->
-          <div class="tab-pane fade show active" id="general" role="tabpanel">
-            <div class="mb-3">
-              <label class="form-label">Chế Độ Trả Lời</label>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="radio" name="responseMode" id="autoMode" value="auto" checked>
-                <label class="form-check-label" for="autoMode">
-                  Tự động - Chatbot trả lời tất cả câu hỏi
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="responseMode" id="assistMode" value="assist">
-                <label class="form-check-label" for="assistMode">
-                  Hỗ trợ - Chatbot đề xuất câu trả lời cho admin
-                </label>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Quyền Truy Cập Dữ Liệu</label>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="dataAccessCustomers" checked>
-                <label class="form-check-label" for="dataAccessCustomers">
-                  Khách hàng
-                </label>
-              </div>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="dataAccessProjects" checked>
-                <label class="form-check-label" for="dataAccessProjects">
-                  Dự án
-                </label>
-              </div>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="dataAccessInteractions" checked>
-                <label class="form-check-label" for="dataAccessInteractions">
-                  Tương tác
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="dataAccessFinancial">
-                <label class="form-check-label" for="dataAccessFinancial">
-                  Tài chính (Yêu cầu quyền admin)
-                </label>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="apiKey" class="form-label">API Key Chatbot</label>
-              <div class="input-group">
-                <input type="password" class="form-control" id="apiKey"
-                  value="sk_test_123456789abcdefghijklmnopqrstuvwxyz">
-                <button class="btn btn-outline-secondary" type="button" id="showApiKey">
-                  <i class="fas fa-eye"></i>
-                </button>
-              </div>
-              <div class="form-text">API key để kết nối với dịch vụ chatbot.</div>
-            </div>
+        <div class="mb-3">
+          <label class="form-label">Chế Độ Trả Lời</label>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="responseMode" id="autoMode" value="auto" checked>
+            <label class="form-check-label" for="autoMode">
+              Tự động - Chatbot trả lời tất cả câu hỏi
+            </label>
           </div>
-
-          <!-- Knowledge Base Settings -->
-          <div class="tab-pane fade" id="knowledge" role="tabpanel">
-            <div class="mb-3">
-              <label class="form-label">Nguồn Dữ Liệu</label>
-              <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                  <thead>
-                    <tr>
-                      <th>Tên Nguồn</th>
-                      <th>Loại</th>
-                      <th>Trạng Thái</th>
-                      <th>Thao Tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Dữ liệu CRM</td>
-                      <td><span class="badge bg-primary">Cơ sở dữ liệu</span></td>
-                      <td><span class="badge bg-success">Đã kết nối</span></td>
-                      <td>
-                        <button class="btn btn-sm btn-outline-primary">Cấu hình</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Tài liệu hướng dẫn</td>
-                      <td><span class="badge bg-info">Tài liệu</span></td>
-                      <td><span class="badge bg-success">Đã kết nối</span></td>
-                      <td>
-                        <button class="btn btn-sm btn-outline-primary">Cấu hình</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Mẫu email</td>
-                      <td><span class="badge bg-warning">Mẫu</span></td>
-                      <td><span class="badge bg-secondary">Không kết nối</span></td>
-                      <td>
-                        <button class="btn btn-sm btn-outline-primary">Kết nối</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <button class="btn btn-sm btn-primary">
-                <i class="fas fa-plus me-1"></i> Thêm Nguồn Mới
-              </button>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Cập Nhật Cơ Sở Kiến Thức</label>
-              <div class="input-group">
-                <select class="form-select">
-                  <option value="daily">Hàng ngày</option>
-                  <option value="weekly" selected>Hàng tuần</option>
-                  <option value="monthly">Hàng tháng</option>
-                  <option value="manual">Thủ công</option>
-                </select>
-                <button class="btn btn-primary" type="button">
-                  <i class="fas fa-sync-alt me-1"></i> Cập Nhật Ngay
-                </button>
-              </div>
-              <div class="form-text">Lần cập nhật cuối: 20/05/2025 14:30</div>
-            </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="responseMode" id="assistMode" value="assist">
+            <label class="form-check-label" for="assistMode">
+              Hỗ trợ - Chatbot đề xuất câu trả lời cho admin
+            </label>
           </div>
+        </div>
 
-          <!-- Appearance Settings -->
-          <div class="tab-pane fade" id="appearance" role="tabpanel">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Giao Diện Chatbot</label>
-                  <div class="d-flex gap-2">
-                    <div class="form-check appearance-option">
-                      <input class="form-check-input" type="radio" name="appearance" id="lightTheme" checked>
-                      <label class="form-check-label p-2 border rounded text-center" for="lightTheme">
-                        <div class="theme-preview light-theme mb-2"></div>
-                        Sáng
-                      </label>
-                    </div>
-                    <div class="form-check appearance-option">
-                      <input class="form-check-input" type="radio" name="appearance" id="darkTheme">
-                      <label class="form-check-label p-2 border rounded text-center" for="darkTheme">
-                        <div class="theme-preview dark-theme mb-2"></div>
-                        Tối
-                      </label>
-                    </div>
-                    <div class="form-check appearance-option">
-                      <input class="form-check-input" type="radio" name="appearance" id="systemTheme">
-                      <label class="form-check-label p-2 border rounded text-center" for="systemTheme">
-                        <div class="theme-preview system-theme mb-2"></div>
-                        Theo hệ thống
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label">Màu Sắc Chính</label>
-                  <div class="d-flex gap-2">
-                    <div class="form-check appearance-option">
-                      <input class="form-check-input" type="radio" name="colorTheme" id="blueTheme" checked>
-                      <label class="form-check-label p-2 border rounded text-center" for="blueTheme">
-                        <div class="color-preview blue-theme mb-2"></div>
-                        Xanh
-                      </label>
-                    </div>
-                    <div class="form-check appearance-option">
-                      <input class="form-check-input" type="radio" name="colorTheme" id="greenTheme">
-                      <label class="form-check-label p-2 border rounded text-center" for="greenTheme">
-                        <div class="color-preview green-theme mb-2"></div>
-                        Lục
-                      </label>
-                    </div>
-                    <div class="form-check appearance-option">
-                      <input class="form-check-input" type="radio" name="colorTheme" id="purpleTheme">
-                      <label class="form-check-label p-2 border rounded text-center" for="purpleTheme">
-                        <div class="color-preview purple-theme mb-2"></div>
-                        Tím
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="fontSizeRange" class="form-label">Kích Thước Chữ</label>
-              <input type="range" class="form-range" min="12" max="20" step="1" value="14" id="fontSizeRange">
-              <div class="d-flex justify-content-between">
-                <small>Nhỏ</small>
-                <small>Trung bình</small>
-                <small>Lớn</small>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="chatbotName" class="form-label">Tên Chatbot</label>
-              <input type="text" class="form-control" id="chatbotName" value="Assistant CRM">
-            </div>
-
-            <div class="mb-3">
-              <label for="chatbotAvatar" class="form-label">Hình Đại Diện Chatbot</label>
-              <div class="d-flex align-items-center">
-                <img src="/public/assets/images/logo.png" alt="Bot Avatar" class="me-3"
-                  style="width: 48px; height: 48px; border-radius: 50%;">
-                <input type="file" class="form-control" id="chatbotAvatar">
-              </div>
-            </div>
+        <div class="mb-3">
+          <label class="form-label">Quyền Truy Cập Dữ Liệu</label>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="dataAccessCustomers" checked>
+            <label class="form-check-label" for="dataAccessCustomers">
+              Khách hàng
+            </label>
           </div>
-
-          <!-- Logs Tab -->
-          <div class="tab-pane fade" id="logs" role="tabpanel">
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label mb-0">Nhật Ký Hoạt Động</label>
-                <div>
-                  <button class="btn btn-sm btn-outline-secondary me-2">
-                    <i class="fas fa-download me-1"></i> Xuất
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-trash me-1"></i> Xóa
-                  </button>
-                </div>
-              </div>
-              <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                <table class="table table-sm table-hover">
-                  <thead class="table-light sticky-top">
-                    <tr>
-                      <th>Thời Gian</th>
-                      <th>Người Dùng</th>
-                      <th>Hành Động</th>
-                      <th>Trạng Thái</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>22/05/2025 14:30</td>
-                      <td>admin</td>
-                      <td>Truy vấn thông tin khách hàng KH001</td>
-                      <td><span class="badge bg-success">Thành công</span></td>
-                    </tr>
-                    <tr>
-                      <td>22/05/2025 14:28</td>
-                      <td>admin</td>
-                      <td>Tạo tương tác mới</td>
-                      <td><span class="badge bg-success">Thành công</span></td>
-                    </tr>
-                    <tr>
-                      <td>22/05/2025 14:25</td>
-                      <td>admin</td>
-                      <td>Truy vấn danh sách dự án đang hoạt động</td>
-                      <td><span class="badge bg-success">Thành công</span></td>
-                    </tr>
-                    <tr>
-                      <td>22/05/2025 14:20</td>
-                      <td>admin</td>
-                      <td>Cập nhật cấu hình chatbot</td>
-                      <td><span class="badge bg-success">Thành công</span></td>
-                    </tr>
-                    <tr>
-                      <td>22/05/2025 14:15</td>
-                      <td>admin</td>
-                      <td>Truy vấn thông tin không có quyền truy cập</td>
-                      <td><span class="badge bg-danger">Thất bại</span></td>
-                    </tr>
-                    <tr>
-                      <td>22/05/2025 14:10</td>
-                      <td>hethong</td>
-                      <td>Cập nhật cơ sở kiến thức tự động</td>
-                      <td><span class="badge bg-success">Thành công</span></td>
-                    </tr>
-                    <tr>
-                      <td>22/05/2025 14:05</td>
-                      <td>admin</td>
-                      <td>Đăng nhập vào hệ thống</td>
-                      <td><span class="badge bg-success">Thành công</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Cài Đặt Nhật Ký</label>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="logUserQueries" checked>
-                <label class="form-check-label" for="logUserQueries">
-                  Ghi lại truy vấn người dùng
-                </label>
-              </div>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="logBotResponses" checked>
-                <label class="form-check-label" for="logBotResponses">
-                  Ghi lại phản hồi của chatbot
-                </label>
-              </div>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="logErrors" checked>
-                <label class="form-check-label" for="logErrors">
-                  Ghi lại lỗi
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="logSystemEvents" checked>
-                <label class="form-check-label" for="logSystemEvents">
-                  Ghi lại sự kiện hệ thống
-                </label>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="logRetentionPeriod" class="form-label">Thời Gian Lưu Trữ Nhật Ký</label>
-              <select class="form-select" id="logRetentionPeriod">
-                <option value="7">7 ngày</option>
-                <option value="30" selected>30 ngày</option>
-                <option value="90">90 ngày</option>
-                <option value="180">180 ngày</option>
-                <option value="365">365 ngày</option>
-              </select>
-            </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="dataAccessProjects" checked>
+            <label class="form-check-label" for="dataAccessProjects">
+              Dự án
+            </label>
           </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="dataAccessInteractions" checked>
+            <label class="form-check-label" for="dataAccessInteractions">
+              Tương tác
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="dataAccessFinancial">
+            <label class="form-check-label" for="dataAccessFinancial">
+              Tài chính (Yêu cầu quyền admin)
+            </label>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="gemini_api_key" class="form-label">Gemini API Key</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="gemini_api_key" name="gemini_api_key"
+              value="<?php echo htmlspecialchars($gemini_api_key); ?>">
+            <button class="btn btn-outline-secondary" type="button" id="showGeminiKey">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn btn-outline-primary" type="button" id="testGeminiKey">
+              <i class="fas fa-check me-1"></i> Kiểm tra
+            </button>
+          </div>
+          <div class="form-text">API key để kết nối với dịch vụ Google Gemini AI. <a
+              href="https://makersuite.google.com/app/apikey" target="_blank">Lấy API key</a></div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-primary">Lưu Thay Đổi</button>
+        <button type="button" class="btn btn-primary" id="saveSettingsBtn">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API Test Modal -->
+<div class="modal fade" id="apiTestModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Kiểm Tra API Key</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="apiTestResult">
+          <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Đang kiểm tra...</span>
+            </div>
+          </div>
+          <p class="text-center mt-3">Đang kiểm tra kết nối với API...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -647,41 +615,6 @@ ob_start();
   padding: 0 8px;
 }
 
-.data-card {
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.data-card-header {
-  padding: 8px 12px;
-  background-color: rgba(0, 0, 0, 0.03);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.data-card-body {
-  padding: 12px;
-}
-
-.data-card-body p {
-  margin-bottom: 6px;
-}
-
-.data-card-body p:last-child {
-  margin-bottom: 0;
-}
-
-.data-card-footer {
-  padding: 8px 12px;
-  background-color: rgba(0, 0, 0, 0.03);
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  text-align: right;
-}
-
 .suggestion-item {
   cursor: pointer;
   transition: all 0.2s;
@@ -695,57 +628,36 @@ ob_start();
   position: relative;
 }
 
-.option-buttons {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-/* Appearance Settings Styles */
-.appearance-option .form-check-input {
-  position: absolute;
+/* Typing animation */
+.typing-animation span {
   opacity: 0;
+  animation: typingDot 1.5s infinite;
 }
 
-.appearance-option .form-check-label {
-  cursor: pointer;
-  transition: all 0.2s;
+.typing-animation span:nth-child(1) {
+  animation-delay: 0s;
 }
 
-.appearance-option .form-check-input:checked+.form-check-label {
-  border-color: #0d6efd !important;
-  background-color: #f0f7ff;
+.typing-animation span:nth-child(2) {
+  animation-delay: 0.5s;
 }
 
-.theme-preview,
-.color-preview {
-  width: 60px;
-  height: 40px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+.typing-animation span:nth-child(3) {
+  animation-delay: 1s;
 }
 
-.light-theme {
-  background-color: #ffffff;
-}
+@keyframes typingDot {
+  0% {
+    opacity: 0;
+  }
 
-.dark-theme {
-  background-color: #212529;
-}
+  50% {
+    opacity: 1;
+  }
 
-.system-theme {
-  background: linear-gradient(to right, #ffffff 50%, #212529 50%);
-}
-
-.blue-theme {
-  background-color: #0d6efd;
-}
-
-.green-theme {
-  background-color: #198754;
-}
-
-.purple-theme {
-  background-color: #6f42c1;
+  100% {
+    opacity: 0;
+  }
 }
 </style>
 
@@ -757,152 +669,312 @@ document.addEventListener('DOMContentLoaded', function() {
   const clearChatBtn = document.getElementById('clearChatBtn');
   const exportChatBtn = document.getElementById('exportChatBtn');
   const suggestionItems = document.querySelectorAll('.suggestion-item');
-  const typingIndicator = document.getElementById('typingIndicator');
   const voiceInputBtn = document.getElementById('voiceInputBtn');
+  const showGeminiKey = document.getElementById('showGeminiKey');
+  const geminiApiKeyInput = document.getElementById('gemini_api_key');
+  const testGeminiKeyBtn = document.getElementById('testGeminiKey');
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
 
   // Scroll to bottom of chat
   function scrollToBottom() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
-  // Initialize chat
-  scrollToBottom();
+  // Add a message to the chat
+  function addMessageToChat(sender, content) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender}-message mb-3`;
+    const currentTime = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
 
-  // Add user message to chat
-  function addUserMessage(message) {
-    const messageElement = document.createElement('div');
-    messageElement.className = 'chat-message user-message mb-3';
-    messageElement.innerHTML = `
+    messageDiv.innerHTML = sender === 'user' ? `
       <div class="message-content">
         <div class="message-bubble">
-          <p class="mb-0">${message}</p>
+          <p class="mb-0">${content.replace(/\n/g, '<br>')}</p>
         </div>
         <div class="message-info">
-          <small class="text-muted">Hôm nay, ${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, '0')}</small>
+          <small class="text-muted">Hôm nay, ${currentTime}</small>
         </div>
       </div>
       <div class="message-avatar">
         <img src="/public/assets/images/avatar.png" alt="User" class="rounded-circle">
       </div>
-    `;
-    chatContainer.appendChild(messageElement);
-    scrollToBottom();
-  }
-
-  // Show bot is typing
-  function showBotTyping() {
-    typingIndicator.textContent = 'Đang trả lời...';
-    scrollToBottom();
-  }
-
-  // Hide bot typing indicator
-  function hideBotTyping() {
-    typingIndicator.textContent = '';
-  }
-
-  // Add bot message to chat (simplified for this example)
-  function addBotMessage(message) {
-    const messageElement = document.createElement('div');
-    messageElement.className = 'chat-message bot-message mb-3';
-    messageElement.innerHTML = `
+    ` : `
       <div class="message-avatar">
         <img src="/public/assets/images/logo.png" alt="Bot" class="rounded-circle">
       </div>
       <div class="message-content">
         <div class="message-bubble">
-          <p class="mb-0">${message}</p>
+          <p class="mb-0">${content.replace(/\n/g, '<br>')}</p>
         </div>
         <div class="message-info">
-          <small class="text-muted">Hôm nay, ${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, '0')}</small>
+          <small class="text-muted">Hôm nay, ${currentTime}</small>
         </div>
       </div>
     `;
-    chatContainer.appendChild(messageElement);
+
+    chatContainer.appendChild(messageDiv);
     scrollToBottom();
   }
 
-  // Simulated bot response
-  function simulateBotResponse(userMessage) {
-    showBotTyping();
-
-    // Simulate network delay
-    setTimeout(() => {
-      hideBotTyping();
-
-      // Simple response logic (for demonstration only)
-      let botResponse = "Tôi không chắc về câu hỏi này. Bạn có thể nói rõ hơn được không?";
-
-      if (userMessage.toLowerCase().includes('xin chào') || userMessage.toLowerCase().includes('chào')) {
-        botResponse = "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?";
-      } else if (userMessage.toLowerCase().includes('khách hàng')) {
-        botResponse = "Bạn muốn biết thông tin về khách hàng nào? Vui lòng cung cấp mã khách hàng hoặc tên.";
-      } else if (userMessage.toLowerCase().includes('dự án')) {
-        botResponse = "Hiện tại có 12 dự án đang hoạt động. Bạn muốn xem thông tin chi tiết về dự án nào?";
-      } else if (userMessage.toLowerCase().includes('tương tác')) {
-        botResponse = "Bạn muốn xem tương tác gần đây hay tạo tương tác mới?";
-      } else if (userMessage.toLowerCase().includes('báo cáo') || userMessage.toLowerCase().includes(
-          'thống kê')) {
-        botResponse =
-          "Tôi có thể giúp bạn tạo các báo cáo sau: Báo cáo khách hàng, Báo cáo dự án, Báo cáo doanh thu.";
-      }
-
-      addBotMessage(botResponse);
-    }, 1000);
+  // Show typing indicator
+  function showTypingIndicator() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    typingIndicator.innerHTML = 'Bot đang nhập...';
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message bot-message mb-3';
+    messageDiv.id = 'typingMessage';
+    messageDiv.innerHTML = `
+      <div class="message-avatar">
+        <img src="/public/assets/images/logo.png" alt="Bot" class="rounded-circle">
+      </div>
+      <div class="message-content">
+        <div class="message-bubble">
+          <p class="mb-0"><span class="typing-animation">Bot đang nhập<span>.</span><span>.</span><span>.</span></span></p>
+        </div>
+      </div>
+    `;
+    chatContainer.appendChild(messageDiv);
+    scrollToBottom();
   }
 
-  // Handle chat form submission
+  // Remove typing indicator
+  function hideTypingIndicator() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    typingIndicator.innerHTML = '';
+    const typingMessage = document.getElementById('typingMessage');
+    if (typingMessage) typingMessage.remove();
+  }
+
+  // Show quota exceeded error
+  function showQuotaExceededError() {
+    hideTypingIndicator();
+    const errorMessage =
+      'Lỗi: Hệ thống đã đạt giới hạn sử dụng API. Vui lòng thử lại sau hoặc liên hệ quản trị viên.';
+    addMessageToChat('bot', errorMessage);
+    const statusBadge = document.getElementById('chatbotStatusBadge');
+    if (statusBadge) {
+      statusBadge.className = 'badge bg-danger ms-2';
+      statusBadge.textContent = 'Lỗi API';
+    }
+    const progressBar = document.getElementById('chatbotStatusBar');
+    if (progressBar) {
+      progressBar.className = 'progress-bar bg-danger';
+      progressBar.style.width = '100%';
+    }
+  }
+
+  // Initialize chat
+  scrollToBottom();
+
+  // Handle form submission with AJAX
   chatForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    const message = messageInput.value.trim();
-    if (message) {
-      addUserMessage(message);
-      messageInput.value = '';
-      simulateBotResponse(message);
-    }
+    const userMessage = messageInput.value.trim();
+    if (!userMessage) return;
+
+    addMessageToChat('user', userMessage);
+    messageInput.value = '';
+    showTypingIndicator();
+
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: 'user_message=' + encodeURIComponent(userMessage)
+      })
+      .then(response => response.json().catch(() => response.text()))
+      .then(response => {
+        hideTypingIndicator();
+        if (typeof response === 'object' && response.chat_reply) {
+          addMessageToChat('bot', response.chat_reply);
+        } else if (typeof response === 'object' && response.error) {
+          if (response.error.includes('quota exceeded') || response.error.includes('429') || response.error
+            .includes('Hạn mức API') || response.error.includes('giới hạn')) {
+            showQuotaExceededError();
+          } else {
+            addMessageToChat('bot', 'Lỗi: ' + response.error);
+          }
+        } else if (typeof response === 'string') {
+          try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(response, 'text/html');
+            const sessionMessages = doc.querySelectorAll('.bot-message .message-bubble p');
+            if (sessionMessages.length > 0) {
+              const lastMessage = sessionMessages[sessionMessages.length - 1];
+              const content = lastMessage.innerHTML.replace(/<br>/g, '\n');
+              if (content) {
+                addMessageToChat('bot', content);
+                return;
+              }
+            }
+            addMessageToChat('bot',
+              'Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này. Vui lòng thử lại sau.');
+          } catch (error) {
+            console.error('Error parsing HTML response:', error);
+            addMessageToChat('bot', 'Xin lỗi, có lỗi khi xử lý phản hồi. Vui lòng thử lại sau.');
+          }
+        } else {
+          addMessageToChat('bot',
+            'Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này. Vui lòng thử lại sau.');
+        }
+      })
+      .catch(error => {
+        console.error('AJAX Error:', error);
+        hideTypingIndicator();
+        addMessageToChat('bot', 'Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại sau.');
+      });
   });
 
   // Handle clear chat button
   clearChatBtn.addEventListener('click', function() {
     if (confirm('Bạn có chắc chắn muốn xóa toàn bộ cuộc trò chuyện?')) {
-      // Remove all messages except the welcome message
-      while (chatContainer.children.length > 1) {
-        chatContainer.removeChild(chatContainer.lastChild);
-      }
+      fetch(window.location.href, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'clear_chat=1'
+        })
+        .then(() => {
+          const messages = chatContainer.querySelectorAll('.chat-message');
+          for (let i = 1; i < messages.length; i++) {
+            messages[i].remove();
+          }
+        })
+        .catch(error => {
+          console.error('Lỗi khi xóa lịch sử trò chuyện:', error);
+          alert('Không thể xóa lịch sử trò chuyện. Vui lòng thử lại.');
+        });
     }
   });
 
   // Handle export chat button
   exportChatBtn.addEventListener('click', function() {
-    alert('Chức năng xuất trò chuyện đang được phát triển.');
+    const chatMessages = chatContainer.innerHTML;
+    const blob = new Blob([chatMessages], {
+      type: 'text/html'
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'chatbot-conversation-' + new Date().toISOString().slice(0, 10) + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   });
 
   // Handle suggestion items
   suggestionItems.forEach(item => {
     item.addEventListener('click', function() {
       const suggestionText = this.textContent.trim();
-      addUserMessage(suggestionText);
-      simulateBotResponse(suggestionText);
+      messageInput.value = suggestionText;
+      chatForm.dispatchEvent(new Event('submit', {
+        bubbles: true,
+        cancelable: true
+      }));
     });
   });
 
-  // Handle voice input button
+  // Handle voice input
   voiceInputBtn.addEventListener('click', function() {
-    alert('Chức năng nhập bằng giọng nói đang được phát triển.');
+    if ('webkitSpeechRecognition' in window) {
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = 'vi-VN';
+      recognition.interimResults = false;
+      recognition.onresult = function(event) {
+        messageInput.value = event.results[0][0].transcript;
+      };
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error', event.error);
+        alert('Không thể nhận dạng giọng nói: ' + event.error);
+      };
+      recognition.start();
+    } else {
+      alert('Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói.');
+    }
   });
 
-  // Toggle API key visibility
-  const showApiKeyBtn = document.getElementById('showApiKey');
-  const apiKeyInput = document.getElementById('apiKey');
+  // Toggle Gemini API key visibility
+  if (showGeminiKey && geminiApiKeyInput) {
+    showGeminiKey.addEventListener('click', function() {
+      geminiApiKeyInput.type = geminiApiKeyInput.type === 'password' ? 'text' : 'password';
+      showGeminiKey.innerHTML = geminiApiKeyInput.type === 'password' ? '<i class="fas fa-eye"></i>' :
+        '<i class="fas fa-eye-slash"></i>';
+    });
+  }
 
-  if (showApiKeyBtn && apiKeyInput) {
-    showApiKeyBtn.addEventListener('click', function() {
-      if (apiKeyInput.type === 'password') {
-        apiKeyInput.type = 'text';
-        showApiKeyBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-      } else {
-        apiKeyInput.type = 'password';
-        showApiKeyBtn.innerHTML = '<i class="fas fa-eye"></i>';
+  // Test Gemini API key
+  if (testGeminiKeyBtn && geminiApiKeyInput) {
+    testGeminiKeyBtn.addEventListener('click', function() {
+      const apiKey = geminiApiKeyInput.value.trim();
+      if (!apiKey) {
+        alert('Vui lòng nhập Gemini API key để kiểm tra');
+        return;
       }
+      const apiTestModal = new bootstrap.Modal(document.getElementById('apiTestModal'));
+      apiTestModal.show();
+      fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey)
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById('apiTestResult').innerHTML = `
+            <div class="text-center">
+              <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+              <h5>Kết nối thành công!</h5>
+              <p>API key hợp lệ và sẵn sàng sử dụng.</p>
+              <p class="text-muted small">Mô hình: ${data.models[0].name}</p>
+            </div>
+          `;
+        })
+        .catch(error => {
+          document.getElementById('apiTestResult').innerHTML = `
+            <div class="text-center">
+              <i class="fas fa-times-circle text-danger fa-4x mb-3"></i>
+              <h5>Kết nối thất bại</h5>
+              <p>Không thể kết nối với Gemini API. Vui lòng kiểm tra lại API key.</p>
+              <p class="text-muted small">Lỗi: ${error.message}</p>
+            </div>
+          `;
+        });
+    });
+  }
+
+  // Save settings
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', function() {
+      const formData = new FormData();
+      formData.append('action', 'save_settings');
+      formData.append('gemini_api_key', geminiApiKeyInput.value.trim());
+      formData.append('response_mode', document.querySelector('input[name="responseMode"]:checked').value);
+      formData.append('data_access_customers', document.getElementById('dataAccessCustomers').checked ? '1' :
+        '0');
+      formData.append('data_access_projects', document.getElementById('dataAccessProjects').checked ? '1' :
+        '0');
+      formData.append('data_access_interactions', document.getElementById('dataAccessInteractions').checked ?
+        '1' : '0');
+      formData.append('data_access_financial', document.getElementById('dataAccessFinancial').checked ? '1' :
+        '0');
+
+      fetch(window.location.href, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.text())
+        .then(() => {
+          const settingsModal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+          settingsModal.hide();
+          alert('Cài đặt đã được lưu thành công!');
+          window.location.reload();
+        })
+        .catch(error => {
+          alert('Không thể lưu cài đặt: ' + error.message);
+        });
     });
   }
 });

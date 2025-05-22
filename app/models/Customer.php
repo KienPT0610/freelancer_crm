@@ -58,10 +58,17 @@ class Customer {
    }
 
    public function addCustomer($data) {
-      $sql = "INSERT INTO customers (name, email, phone, company, address, notes, source, status, tags, created_at, updated_at) 
-              VALUES (:name, :email, :phone, :company, :address, :notes, :source, :status, :tags, NOW(), NOW())";
+      $sql = "INSERT INTO customers (name, email, phone, company, birthday, status, created_at) 
+              VALUES (:name, :email, :phone, :company, :birthday, :status, NOW())";
       $stmt = $this->db->prepare($sql);
-      return $stmt->execute($data);
+      return $stmt->execute([
+          'name' => $data['name'],
+          'email' => $data['email'],
+          'phone' => $data['phone'],
+          'company' => $data['company'],
+          'birthday' => $data['birthday'],
+          'status' => $data['status'] ?? 'active'
+      ]);
    }
 
 

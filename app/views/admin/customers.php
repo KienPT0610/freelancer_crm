@@ -85,6 +85,7 @@ ob_start();
             <th>Email</th>
             <th>Điện Thoại</th>
             <th>Công Ty</th>
+            <th>Ngày Sinh</th>
             <th>Nguồn</th>
             <th>Tags</th>
             <th>Trạng Thái</th>
@@ -132,6 +133,7 @@ ob_start();
               <span class="fw-bold"><?php echo $customer['company']; ?></span>
               <?php endif; ?>
             </td>
+            <td><?php echo $customer['birthday'] ? date('d/m/Y', strtotime($customer['birthday'])) : 'N/A'; ?></td>
             <td><?php echo $customer['source']; ?></td>
             <td><span class="badge bg-primary"><?php echo $customer['tags']; ?></span></td>
             <td>
