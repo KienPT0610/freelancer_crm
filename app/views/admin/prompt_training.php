@@ -435,25 +435,376 @@ Ngày cập nhật: 2025-05-21 19:16:31
 Hình ảnh: NULL
 Ngày sinh: NULL
 
-Tổng số khách hàng: 27"
+Tổng số khách hàng: 27
+Mã khách hàng sẽ là KH0 + ID. Ví dụ ID 15 sẽ là KH015
+Ngày sinh của khách hàng có dạng YYYY-MM-DD. ví dụ 1998-09-01 thì có nghĩa là ngày 01 tháng 09 năm 1998
+Ví dụ hiện tại là ngày 23 tháng 05 năm 2025 định dạng (DD-MM-YYYY). Trong vòng 30 ngày tới (từ 23/05/2025 đến 22/06/2025) những khách hàng nào nằm trong khoảng thời gian này sẽ
+được coi là sắp sinh nhật
+"
     ],
 
     // Prompt về tương tác với khách hàng
     'interaction' => [
         'role' => 'system',
         'content' => "Lịch sử tương tác với khách hàng:
-{interaction_list}
+Tương tác:
+  Mã tương tác: 39
+  Mã khách hàng: 15
+  Loại tương tác: Email
+  Ngày tương tác: 2025-02-05 00:00:00
+  Tóm tắt: Gửi email chào mừng và giới thiệu dịch vụ Freelanc...
+  Người tạo: 1
+  Ngày tạo: 2025-05-21 21:20:37
 
-Tổng số tương tác: {total_interactions}"
+Tương tác:
+  Mã tương tác: 40
+  Mã khách hàng: 15
+  Loại tương tác: Call
+  Ngày tương tác: 2025-02-20 14:00:00
+  Tóm tắt: Thảo luận chi tiết về yêu cầu website
+  Người tạo: 1
+  Ngày tạo: 2025-02-20 14:00:00
+
+Tương tác:
+  Mã tương tác: 41
+  Mã khách hàng: 15
+  Loại tương tác: Meeting
+  Ngày tương tác: 2025-03-10 10:00:00
+  Tóm tắt: Gặp mặt để ký hợp đồng dự án
+  Người tạo: 1
+  Ngày tạo: 2025-03-10 10:00:00
+
+Tương tác:
+  Mã tương tác: 42
+  Mã khách hàng: 16
+  Loại tương tác: Email
+  Ngày tương tác: 2025-02-18 11:00:00
+  Tóm tắt: Gửi báo giá ứng dụng mobile
+  Người tạo: 1
+  Ngày tạo: 2025-02-18 11:00:00
+
+Tương tác:
+  Mã tương tác: 43
+  Mã khách hàng: 16
+  Loại tương tác: Meeting
+  Ngày tương tác: 2025-03-01 09:30:00
+  Tóm tắt: Trình bày demo ứng dụng
+  Người tạo: 1
+  Ngày tạo: 2025-03-01 09:30:00
+
+Tương tác:
+  Mã tương tác: 44
+  Mã khách hàng: 17
+  Loại tương tác: Call
+  Ngày tương tác: 2025-03-05 15:00:00
+  Tóm tắt: Xác nhận hoàn thành tái thiết kế UI
+  Người tạo: 1
+  Ngày tạo: 2025-03-05 15:00:00
+
+Tương tác:
+  Mã tương tác: 45
+  Mã khách hàng: 17
+  Loại tương tác: Email
+  Ngày tương tác: 2025-04-06 08:00:00
+  Tóm tắt: Gửi mockup website portfolio
+  Người tạo: 1
+  Ngày tạo: 2025-04-06 08:00:00
+
+Tương tác:
+  Mã tương tác: 46
+  Mã khách hàng: 18
+  Loại tương tác: Meeting
+  Ngày tương tác: 2025-04-25 13:00:00
+  Tóm tắt: Thảo luận yêu cầu hệ thống CRM
+  Người tạo: 1
+  Ngày tạo: 2025-04-25 13:00:00
+
+Tương tác:
+  Mã tương tác: 47
+  Mã khách hàng: 19
+  Loại tương tác: Call
+  Ngày tương tác: 2025-04-22 10:00:00
+  Tóm tắt: Tư vấn giải pháp website SME
+  Người tạo: 1
+  Ngày tạo: 2025-04-22 10:00:00
+
+Tương tác:
+  Mã tương tác: 48
+  Mã khách hàng: 20
+  Loại tương tác: Email
+  Ngày tương tác: 2025-04-26 09:00:00
+  Tóm tắt: Gửi đề xuất ứng dụng quản lý
+  Người tạo: 1
+  Ngày tạo: 2025-04-26 09:00:00
+
+Tương tác:
+  Mã tương tác: 49
+  Mã khách hàng: 20
+  Loại tương tác: Meeting
+  Ngày tương tác: 2025-05-01 11:00:00
+  Tóm tắt: Ký hợp đồng dự án app
+  Người tạo: 1
+  Ngày tạo: 2025-05-01 11:00:00
+
+Tương tác:
+  Mã tương tác: 50
+  Mã khách hàng: 21
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-01 09:00:00
+  Tóm tắt: Gửi yêu cầu thiết kế website
+  Người tạo: 1
+  Ngày tạo: 2025-05-01 09:00:00
+
+Tương tác:
+  Mã tương tác: 51
+  Mã khách hàng: 21
+  Loại tương tác: Call
+  Ngày tương tác: 2025-05-02 14:00:00
+  Tóm tắt: Thảo luận chi tiết về website công ty
+  Người tạo: 1
+  Ngày tạo: 2025-05-02 14:00:00
+
+Tương tác:
+  Mã tương tác: 52
+  Mã khách hàng: 22
+  Loại tương tác: Call
+  Ngày tương tác: 2025-05-03 09:00:00
+  Tóm tắt: Thảo luận yêu cầu dự án
+  Người tạo: 1
+  Ngày tạo: 2025-05-03 09:00:00
+
+Tương tác:
+  Mã tương tác: 53
+  Mã khách hàng: 23
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-04 10:00:00
+  Tóm tắt: Gửi báo giá hệ thống bán lẻ
+  Người tạo: 1
+  Ngày tạo: 2025-05-04 10:00:00
+
+Tương tác:
+  Mã tương tác: 54
+  Mã khách hàng: 24
+  Loại tương tác: Meeting
+  Ngày tương tác: 2025-05-05 12:00:00
+  Tóm tắt: Trình bày kế hoạch website truyền thông
+  Người tạo: 1
+  Ngày tạo: 2025-05-05 12:00:00
+
+Tương tác:
+  Mã tương tác: 55
+  Mã khách hàng: 25
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-06 09:00:00
+  Tóm tắt: Gửi thông tin dịch vụ app mobile
+  Người tạo: 1
+  Ngày tạo: 2025-05-06 09:00:00
+
+Tương tác:
+  Mã tương tác: 56
+  Mã khách hàng: 26
+  Loại tương tác: Call
+  Ngày tương tác: 2025-05-07 11:00:00
+  Tóm tắt: Tư vấn giải pháp logistics
+  Người tạo: 1
+  Ngày tạo: 2025-05-07 11:00:00
+
+Tương tác:
+  Mã tương tác: 57
+  Mã khách hàng: 27
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-08 10:00:00
+  Tóm tắt: Chào mừng khách hàng mới
+  Người tạo: 1
+  Ngày tạo: 2025-05-08 10:00:00
+
+Tương tác:
+  Mã tương tác: 58
+  Mã khách hàng: 16
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-21 18:41:00
+  Tóm tắt: Chúc mừng sinh nhật
+  Người tạo: NULL
+  Ngày tạo: 2025-05-21 18:41:20
+
+Tương tác:
+  Mã tương tác: 59
+  Mã khách hàng: 16
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-21 18:41:00
+  Tóm tắt: Hoàn thành dự án
+  Người tạo: NULL
+  Ngày tạo: 2025-05-21 18:43:27
+
+Tương tác:
+  Mã tương tác: 60
+  Mã khách hàng: 16
+  Loại tương tác: Call
+  Ngày tương tác: 2025-05-21 18:43:00
+  Tóm tắt: Gọi điện tư vấn
+  Người tạo: 1
+  Ngày tạo: 2025-05-21 18:45:34
+
+Tương tác:
+  Mã tương tác: 66
+  Mã khách hàng: 41
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-21 00:00:00
+  Tóm tắt: Trao đổi giá sp
+  Người tạo: 1
+  Ngày tạo: 2025-05-21 21:08:42
+
+Tương tác:
+  Mã tương tác: 75
+  Mã khách hàng: 15
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-21 21:23:00
+  Tóm tắt: Chúc mừng sinh nhật khách hàng
+  Người tạo: 1
+  Ngày tạo: 2025-05-21 21:25:22
+
+Tương tác:
+  Mã tương tác: 76
+  Mã khách hàng: 23
+  Loại tương tác: Email
+  Ngày tương tác: 2025-05-21 00:00:00
+  Tóm tắt: Chúc mừng sinh nhật bạn!
+  Người tạo: 1
+  Ngày tạo: 2025-05-21 22:16:02
+
+
+Tổng số tương tác: bẳng tổng số tương tác ở trên
+Mã khách hàng sẽ liên kết với bảng khách hàng 
+Người tạo 1 có nghĩa là Admin
+"
     ],
 
     // Prompt về dự án
     'project' => [
         'role' => 'system',
         'content' => "Danh sách dự án:
-{project_list}
+Dự án:
+  Mã dự án: 11
+  Mã khách hàng: 15
+  Tên dự án: Website Thương mại ABC
+  Mô tả: Phát triển website bán hàng trực tuyến
+  Ngày bắt đầu: 2025-03-01
+  Ngày kết thúc: 2025-07-31
+  Trạng thái: InProgress
+  Giá trị: 20000000.0
+  Ngày tạo: 2025-02-15 10:00:00
+  Ngày cập nhật: 2025-04-10 14:00:00
 
-Tổng số dự án: {total_projects}"
+Dự án:
+  Mã dự án: 12
+  Mã khách hàng: 15
+  Tên dự án: Tối ưu SEO ABC
+  Mô tả: Cải thiện thứ hạng tìm kiếm Google
+  Ngày bắt đầu: 2025-04-01
+  Ngày kết thúc: NULL
+  Trạng thái: Pending
+  Giá trị: 5000000.0
+  Ngày tạo: 2025-03-20 11:00:00
+  Ngày cập nhật: 2025-03-20 11:00:00
+
+Dự án:
+  Mã dự án: 13
+  Mã khách hàng: 16
+  Tên dự án: App Đặt hàng Mobile
+  Mô tả: Xây dựng ứng dụng đặt hàng cho SME
+  Ngày bắt đầu: 2025-04-15
+  Ngày kết thúc: 2025-09-30
+  Trạng thái: InProgress
+  Giá trị: 30000000.0
+  Ngày tạo: 2025-03-25 09:00:00
+  Ngày cập nhật: 2025-05-01 12:00:00
+
+Dự án:
+  Mã dự án: 14
+  Mã khách hàng: 17
+  Tên dự án: Tái thiết kế UI XYZ
+  Mô tả: Cải thiện giao diện hệ thống quản lý
+  Ngày bắt đầu: 2025-03-10
+  Ngày kết thúc: 2025-05-15
+  Trạng thái: Completed
+  Giá trị: 10000000.0
+  Ngày tạo: 2025-03-01 13:00:00
+  Ngày cập nhật: 2025-05-15 16:00:00
+
+Dự án:
+  Mã dự án: 15
+  Mã khách hàng: 18
+  Tên dự án: Website Portfolio
+  Mô tả: Tạo website cá nhân giới thiệu
+  Ngày bắt đầu: 2025-04-10
+  Ngày kết thúc: 2025-06-30
+  Trạng thái: InProgress
+  Giá trị: 7000000.0
+  Ngày tạo: 2025-04-01 08:00:00
+  Ngày cập nhật: 2025-05-01 10:00:00
+
+Dự án:
+  Mã dự án: 16
+  Mã khách hàng: 19
+  Tên dự án: Hệ thống CRM Hitech
+  Mô tả: Phát triển CRM tùy chỉnh
+  Ngày bắt đầu: 2025-05-01
+  Ngày kết thúc: NULL
+  Trạng thái: Pending
+  Giá trị: 25000000.0
+  Ngày tạo: 2025-04-20 14:00:00
+  Ngày cập nhật: 2025-04-20 14:00:00
+
+Dự án:
+  Mã dự án: 17
+  Mã khách hàng: 20
+  Tên dự án: App Quản lý K Solutions
+  Mô tả: Ứng dụng quản lý doanh nghiệp
+  Ngày bắt đầu: 2025-05-10
+  Ngày kết thúc: 2025-10-31
+  Trạng thái: InProgress
+  Giá trị: 35000000.0
+  Ngày tạo: 2025-04-25 12:00:00
+  Ngày cập nhật: 2025-05-05 15:00:00
+
+Dự án:
+  Mã dự án: 18
+  Mã khách hàng: 21
+  Tên dự án: Website Công ty L Tech
+  Mô tả: Thiết kế website công ty công nghệ
+  Ngày bắt đầu: 2025-05-15
+  Ngày kết thúc: 2025-07-31
+  Trạng thái: InProgress
+  Giá trị: 12000000.0
+  Ngày tạo: 2025-05-01 09:00:00
+  Ngày cập nhật: 2025-05-10 11:00:00
+
+Dự án:
+  Mã dự án: 19
+  Mã khách hàng: 22
+  Tên dự án: Hệ thống Bán lẻ N Retail
+  Mô tả: Xây dựng hệ thống quản lý bán lẻ
+  Ngày bắt đầu: 2025-05-20
+  Ngày kết thúc: NULL
+  Trạng thái: Pending
+  Giá trị: 18000000.0
+  Ngày tạo: 2025-05-03 10:00:00
+  Ngày cập nhật: 2025-05-03 10:00:00
+
+Dự án:
+  Mã dự án: 20
+  Mã khách hàng: 23
+  Tên dự án: Website Truyền thông O Media
+  Mô tả: Tạo website cho công ty truyền thông
+  Ngày bắt đầu: 2025-05-10
+  Ngày kết thúc: 2025-08-31
+  Trạng thái: InProgress
+  Giá trị: 15000000.0
+  Ngày tạo: 2025-05-04 13:00:00
+  Ngày cập nhật: 2025-05-06 14:00:00
+
+
+Tổng số dự án: 11"
     ],
 
     // Prompt về thống kê

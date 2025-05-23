@@ -170,36 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["user_message"])) {
             // Xóa dữ liệu khách hàng mới khỏi session
             unset($_SESSION['new_customer']);
         }
-        // Xử lý xem chi tiết khách hàng
-        elseif (preg_match('/xem chi tiết khách hàng\s+(.+)/i', $user_message, $matches)) {
-            $customerName = trim($matches[1]);
-            $customers = $_SESSION['customer_list'] ?? [];
-            $found = false;
-            
-            foreach ($customers as $customer) {
-                if (stripos($customer['name'], $customerName) !== false) {
-                    $found = true;
-                    $birthday = $customer['birthday'] ? date('d/m/Y', strtotime($customer['birthday'])) : 'N/A';
-                    
-                    $chat_reply = "Thông tin chi tiết khách hàng:\n\n";
-                    $chat_reply .= "Tên: {$customer['name']}\n";
-                    $chat_reply .= "Email: {$customer['email']}\n";
-                    $chat_reply .= "Số điện thoại: {$customer['phone']}\n";
-                    $chat_reply .= "Công ty: {$customer['company']}\n";
-                    $chat_reply .= "Ngày sinh: {$birthday}\n";
-                    $chat_reply .= "Địa chỉ: {$customer['address']}\n";
-                    $chat_reply .= "Nguồn: {$customer['source']}\n";
-                    $chat_reply .= "Trạng thái: {$customer['status']}\n";
-                    $chat_reply .= "Thẻ: {$customer['tags']}\n";
-                    $chat_reply .= "Ghi chú: {$customer['notes']}";
-                    break;
-                }
-            }
-            
-            if (!$found) {
-                $chat_reply = "Không tìm thấy khách hàng với tên: {$customerName}";
-            }
-        }
+
         // Nếu không phải lệnh đặc biệt, sử dụng Gemini API
         else {
             // Chuẩn bị tin nhắn theo định dạng của Gemini API
