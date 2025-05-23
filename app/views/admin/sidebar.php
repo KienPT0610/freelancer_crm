@@ -37,8 +37,12 @@
     </a>
 
     <a class="sidebar-item <?php echo $active_page == 'site_content' ? 'active' : ''; ?>" href="/admin/site-content">
-      <i class="fas fa-chart-bar"></i>
+      <i class="fas fa-file-alt"></i>
       <span>Site content</span>
+    </a>
+    <a class="sidebar-item <?php echo $active_page == 'chatbot' ? 'active' : ''; ?>" href="/admin/chatbot">
+      <i class="fas fa-robot"></i>
+      <span>Chatbot</span>
     </a>
 
     <div class="sidebar-heading">Cài Đặt</div>

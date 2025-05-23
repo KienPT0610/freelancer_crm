@@ -14,7 +14,7 @@ ob_start();
     <div class="card info-card primary">
       <div class="card-body">
         <div class="card-title">Tổng Khách Hàng</div>
-        <div class="card-value">24</div>
+        <div class="card-value"><?php echo count($customers); ?></div>
         <i class="fas fa-users"></i>
       </div>
     </div>
@@ -24,7 +24,7 @@ ob_start();
     <div class="card info-card success">
       <div class="card-body">
         <div class="card-title">Dự Án Đang Hoạt Động</div>
-        <div class="card-value">13</div>
+        <div class="card-value"><?php echo count($projects); ?></div>
         <i class="fas fa-project-diagram"></i>
       </div>
     </div>
@@ -34,7 +34,7 @@ ob_start();
     <div class="card info-card info">
       <div class="card-body">
         <div class="card-title">Tương Tác Mới</div>
-        <div class="card-value">7</div>
+        <div class="card-value"><?php echo count($interactions); ?></div>
         <i class="fas fa-comments"></i>
       </div>
     </div>
@@ -44,7 +44,15 @@ ob_start();
     <div class="card info-card warning">
       <div class="card-body">
         <div class="card-title">Liên Hệ Chưa Đọc</div>
-        <div class="card-value">5</div>
+        <div class="card-value">
+          <?php
+          // Count unread contacts
+          $unread_contacts = array_filter($contacts, function($contact) {
+            return !$contact['is_read'];
+          });
+          echo count($unread_contacts);
+          ?>
+        </div>
         <i class="fas fa-envelope"></i>
       </div>
     </div>
@@ -114,54 +122,39 @@ ob_start();
           </tr>
         </thead>
         <tbody>
+          <?php foreach (array_slice($projects, 0, min(count($projects), 4)) as $project): ?>
           <tr>
-            <td>Thiết Kế Website</td>
-            <td>Công Ty TNHH ABC</td>
-            <td>2023-10-15</td>
-            <td>2023-11-30</td>
-            <td>₫15,000,000</td>
-            <td><span class="badge-status badge-active">Đang Tiến Hành</span></td>
+            <td><?php echo $project['project_name']; ?></td>
+            <td><?php echo $project['customer_name']; ?></td>
+            <td><?php echo $project['start_date']; ?></td>
+            <td><?php echo $project['end_date']; ?></td>
+            <td><?php echo number_format($project['value'], 0, ',', '.'); ?></td>
+            <td>
+              <?php
+              switch ($project['status']) {
+                case 'Pending':
+                  echo '<span class="badge bg-warning">Chờ Xử Lý</span>';
+                  break;
+                case 'InProgress':
+                  echo '<span class="badge bg-info">Đang Tiến Hành</span>';
+                  break;
+                case 'Completed':
+                  echo '<span class="badge bg-success">Hoàn Thành</span>';
+                  break;
+                case 'Canceled':
+                  echo '<span class="badge bg-danger">Đã Hủy</span>';
+                  break;
+                default:
+                  echo '<span class="badge bg-secondary">Không xác định</span>';
+              }
+              ?>
+            </td>
             <td>
               <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
               <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-edit"></i></a>
             </td>
           </tr>
-          <tr>
-            <td>Tích Hợp Thanh Toán</td>
-            <td>Shop XYZ</td>
-            <td>2023-10-01</td>
-            <td>2023-10-25</td>
-            <td>₫8,500,000</td>
-            <td><span class="badge-status badge-completed">Hoàn Thành</span></td>
-            <td>
-              <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-edit"></i></a>
-            </td>
-          </tr>
-          <tr>
-            <td>Ứng Dụng Di Động</td>
-            <td>Startup Tech</td>
-            <td>2023-11-01</td>
-            <td>2024-01-15</td>
-            <td>₫25,000,000</td>
-            <td><span class="badge-status badge-pending">Chờ Xử Lý</span></td>
-            <td>
-              <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-edit"></i></a>
-            </td>
-          </tr>
-          <tr>
-            <td>Tối Ưu Hóa SEO</td>
-            <td>Cửa Hàng Online</td>
-            <td>2023-09-15</td>
-            <td>2023-10-15</td>
-            <td>₫5,000,000</td>
-            <td><span class="badge-status badge-cancelled">Đã Hủy</span></td>
-            <td>
-              <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
-              <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-edit"></i></a>
-            </td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -179,38 +172,23 @@ ob_start();
       </div>
       <div class="card-body p-0">
         <div class="list-group list-group-flush">
+          <?php foreach (array_slice($interactions, 0, min(count($interactions), 4)) as $interaction): ?>
           <div class="list-group-item">
             <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Cuộc Gọi Với Công Ty TNHH ABC</h6>
-              <small class="text-muted">Hôm nay</small>
+              <h6 class="mb-1">
+                <?php echo $interaction['customer_name']; ?>
+              </h6>
+              <small class="text-muted">
+                <?php echo date('d/m/Y H:i', strtotime($interaction['created_at'])); ?>
+              </small>
             </div>
-            <p class="mb-1 text-truncate">Thảo luận về quy trình triển khai dự án và tiến độ...</p>
-            <small class="text-primary">Loại: Cuộc Gọi | <span class="text-muted">bởi Admin</span></small>
+            <p class="mb-1 text-truncate">
+              <?php echo $interaction['summary']; ?>
+            </p>
+            <small class="text-primary">Loại: <?php echo $interaction['interaction_type'] ?> | <span
+                class="text-muted">bởi Admin</span></small>
           </div>
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Email Báo Giá Cho Startup Tech</h6>
-              <small class="text-muted">Hôm qua</small>
-            </div>
-            <p class="mb-1 text-truncate">Gửi báo giá chi tiết cho dự án ứng dụng di động...</p>
-            <small class="text-primary">Loại: Email | <span class="text-muted">bởi Admin</span></small>
-          </div>
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Cuộc Họp Với Shop XYZ</h6>
-              <small class="text-muted">3 ngày trước</small>
-            </div>
-            <p class="mb-1 text-truncate">Thống nhất các yêu cầu cuối cùng và hoàn tất thanh toán...</p>
-            <small class="text-primary">Loại: Cuộc Họp | <span class="text-muted">bởi Admin</span></small>
-          </div>
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Ghi Chú Về Cửa Hàng Online</h6>
-              <small class="text-muted">1 tuần trước</small>
-            </div>
-            <p class="mb-1 text-truncate">Khách hàng quyết định tạm hoãn dự án do vấn đề ngân sách...</p>
-            <small class="text-primary">Loại: Ghi Chú | <span class="text-muted">bởi Admin</span></small>
-          </div>
+          <?php endforeach; ?>
         </div>
       </div>
     </div>
@@ -225,38 +203,19 @@ ob_start();
       </div>
       <div class="card-body p-0">
         <div class="list-group list-group-flush">
+          <?php foreach (array_slice($contacts, 0, min(count($contacts), 4)) as $contact): ?>
           <div class="list-group-item">
             <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Nguyễn Văn A</h6>
-              <small class="text-danger">Chưa đọc</small>
+              <h6 class="mb-1"><?php echo $contact['name']; ?></h6>
+              <small class="text-danger"><?php echo $contact['status']; ?></small>
             </div>
-            <p class="mb-1 text-truncate">Tôi muốn tìm hiểu về dịch vụ thiết kế website...</p>
-            <small class="text-muted">2 giờ trước | <a href="mailto:nguyenvana@example.com">nguyenvana@example.com</a></small>
+            <p class="mb-1 text-truncate">
+              <?php echo $contact['message']; ?>
+            </p>
+            <small class="text-muted"> <?php echo $contact['submission_date'] ?> | <a
+                href="mailto:<?php echo $contact['email']; ?>"><?php echo $contact['email']; ?></a></small>
           </div>
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Trần Thị B</h6>
-              <small class="text-danger">Chưa đọc</small>
-            </div>
-            <p class="mb-1 text-truncate">Cần tư vấn về giải pháp thương mại điện tử...</p>
-            <small class="text-muted">5 giờ trước | <a href="mailto:tranthib@example.com">tranthib@example.com</a></small>
-          </div>
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Công Ty XYZ</h6>
-              <small class="text-success">Đã đọc</small>
-            </div>
-            <p class="mb-1 text-truncate">Chúng tôi cần một đối tác phát triển phần mềm dài hạn...</p>
-            <small class="text-muted">1 ngày trước | <a href="mailto:contact@xyz.com">contact@xyz.com</a></small>
-          </div>
-          <div class="list-group-item">
-            <div class="d-flex w-100 justify-content-between">
-              <h6 class="mb-1">Lê Văn C</h6>
-              <small class="text-success">Đã đọc</small>
-            </div>
-            <p class="mb-1 text-truncate">Tôi cần báo giá cho một dự án ứng dụng di động...</p>
-            <small class="text-muted">2 ngày trước | <a href="mailto:levanc@example.com">levanc@example.com</a></small>
-          </div>
+          <?php endforeach; ?>
         </div>
       </div>
     </div>

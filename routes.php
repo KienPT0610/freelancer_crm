@@ -101,10 +101,14 @@ if ($request == '/') {
   $id = $matches[1];
   $adminController = new AdminController();
   $adminController->deleteSiteContent($id);
+} elseif ($request == '/admin/chatbot') {
+  $adminController = new AdminController();
+  $adminController->chatbot();
 } elseif ($request == '/logout') {
   $adminController = new AdminController();
   $adminController->logout();
-
+} elseif ($request == '/admin/test') {
+  include __DIR__ . '/app/views/admin/test.php';
 } else {
   http_response_code(404);
   echo "404 Not Found";
