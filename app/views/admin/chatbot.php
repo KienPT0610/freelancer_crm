@@ -53,7 +53,8 @@ Khi người dùng yêu cầu thực hiện các thao tác trên, bạn sẽ ph�
 }
 
 // API key for Gemini
-$gemini_api_key = 'AIzaSyCwcZHvmPyzblpwh_LCK2p3GFTbcv2vdZA'; // Replace with your actual Gemini API key
+$env = require __DIR__ . '/../../../env.php';
+$gemini_api_key = $env['gemini_api_key'];
 
 // Process chat request
 $chat_reply = '';
