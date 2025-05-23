@@ -2,6 +2,8 @@
 // Set variables for the layout
 $page_title = 'Chatbot';
 $active_page = 'chatbot';
+date_default_timezone_set('Asia/Ho_Chi_Minh'); // Múi giờ Việt Nam;
+include(__DIR__ . '/prompt_training.php');
 
 // Tạo session nếu chưa được khởi tạo
 if (!isset($_SESSION)) {
@@ -12,23 +14,31 @@ if (!isset($_SESSION)) {
 require_once __DIR__ . '/../../models/Customer.php';
 require_once __DIR__ . '/../../models/Interaction.php';
 
+// Thêm hàm helper để chuyển đổi thứ trong tuần sang tiếng Việt
+function getVietnameseWeekday($date) {
+    $weekdays = [
+        'Monday' => 'Thứ Hai',
+        'Tuesday' => 'Thứ Ba',
+        'Wednesday' => 'Thứ Tư',
+        'Thursday' => 'Thứ Năm',
+        'Friday' => 'Thứ Sáu',
+        'Saturday' => 'Thứ Bảy',
+        'Sunday' => 'Chủ Nhật'
+    ];
+    return $weekdays[date('l', strtotime($date))];
+}
+
+// Thêm hàm helper để định dạng ngày tháng theo tiếng Việt
+function getVietnameseDate($date) {
+    $weekday = getVietnameseWeekday($date);
+    return $weekday . ', ngày ' . date('d', strtotime($date)) . ' tháng ' . date('m', strtotime($date)) . ' năm ' . date('Y', strtotime($date));
+}
+
 // Handle clearing chat history
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["clear_chat"])) {
     // Keep only the initial system message
-    $system_message = isset($_SESSION['chat_messages'][0]) ? $_SESSION['chat_messages'][0] : [
-        "role" => "system",
-        "content" => "Bạn là trợ lý ảo CRM, giúp người dùng quản lý khách hàng, dự án và tương tác. Bạn có thể:
-1. Hiển thị danh sách khách hàng
-2. Thêm khách hàng mới với các thông tin: tên, email, số điện thoại, công ty, địa chỉ, nguồn, trạng thái, thẻ và ghi chú
-3. Xem chi tiết khách hàng
-4. Cập nhật thông tin khách hàng
-5. Xóa khách hàng
-6. Thêm tương tác với khách hàng
-7. Xem lịch sử tương tác với khách hàng
-
-Khi người dùng yêu cầu thực hiện các thao tác trên, bạn sẽ phân tích yêu cầu và thực hiện các bước tương ứng."
-    ];
-    $_SESSION['chat_messages'] = [$system_message];
+    $system_message = isset($_SESSION['chat_messages'][0]) ? $_SESSION['chat_messages'][0] : $prompt;
+    $_SESSION['chat_messages'] = $system_message;
     
     // Return success response and exit
     header('Content-Type: application/json');
@@ -38,18 +48,7 @@ Khi người dùng yêu cầu thực hiện các thao tác trên, bạn sẽ ph�
 
 // Initialize chat messages in session if not set
 if (!isset($_SESSION['chat_messages'])) {
-    $_SESSION['chat_messages'] = [
-        ["role" => "system", "content" => "Bạn là trợ lý ảo CRM, giúp người dùng quản lý khách hàng, dự án và tương tác. Bạn có thể:
-1. Hiển thị danh sách khách hàng
-2. Thêm khách hàng mới với các thông tin: tên, email, số điện thoại, công ty, địa chỉ, nguồn, trạng thái, thẻ và ghi chú
-3. Xem chi tiết khách hàng
-4. Cập nhật thông tin khách hàng
-5. Xóa khách hàng
-6. Thêm tương tác với khách hàng
-7. Xem lịch sử tương tác với khách hàng
-
-Khi người dùng yêu cầu thực hiện các thao tác trên, bạn sẽ phân tích yêu cầu và thực hiện các bước tương ứng."]
-    ];
+    $_SESSION['chat_messages'] = $prompt;
 }
 
 // API key for Gemini
@@ -62,13 +61,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["user_message"])) {
     $user_message = trim($_POST["user_message"]);
     
     if (!empty($user_message)) {
-        // Add user message to history
-        $_SESSION['chat_messages'][] = ["role" => "user", "content" => $user_message];
+        // Add user message to history with current timestamp
+        $_SESSION['chat_messages'][] = [
+            "role" => "user", 
+            "content" => $user_message, 
+            "timestamp" => date('Y-m-d H:i:s')
+        ];
+        
+        // Cập nhật system message với thời gian mới
+        $currentTime = date('Y-m-d H:i:s');
+        $systemMessage = $_SESSION['chat_messages'][0]['content'];
+        $systemMessage = preg_replace(
+            '/Thời gian hiện tại:.*?(?=\n|$)/s',
+            'Thời gian hiện tại: ' . getVietnameseDate(date('Y-m-d')) . ', ' . date('H:i:s'),
+            $systemMessage
+        );
+        $systemMessage = preg_replace(
+            '/Ngày trong tuần:.*?(?=\n|$)/s',
+            'Ngày trong tuần: ' . getVietnameseWeekday(date('Y-m-d')),
+            $systemMessage
+        );
+        $systemMessage = preg_replace(
+            '/Ngày trong tháng:.*?(?=\n|$)/s',
+            'Ngày trong tháng: ' . date('d'),
+            $systemMessage
+        );
+        $systemMessage = preg_replace(
+            '/Tháng:.*?(?=\n|$)/s',
+            'Tháng: ' . date('m'),
+            $systemMessage
+        );
+        $systemMessage = preg_replace(
+            '/Năm:.*?(?=\n|$)/s',
+            'Năm: ' . date('Y'),
+            $systemMessage
+        );
+        
+        $_SESSION['chat_messages'][0]['content'] = $systemMessage;
+        $_SESSION['chat_messages'][0]['timestamp'] = $currentTime;
+        
+        // Debug information
+        error_log("User message: " . $user_message);
+        error_log("Lowercase message: " . strtolower($user_message));
+        error_log("String position check: " . strpos(strtolower($user_message), 'hiển thị danh sách khách hàng'));
         
         // Limit chat history to prevent excessive token usage
         if (count($_SESSION['chat_messages']) > 10) {
             $system_message = $_SESSION['chat_messages'][0];
-            $_SESSION['chat_messages'] = array_slice($_SESSION['chat_messages'], -9);
+            $_SESSION['chat_messages'] = array_slice($_SESSION['chat_messages'], -100);
             array_unshift($_SESSION['chat_messages'], $system_message);
         }
 
@@ -77,37 +117,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["user_message"])) {
         $interactionModel = new \App\Models\Interaction();
         
         // Xử lý hiển thị danh sách khách hàng
-        if (strpos(strtolower($user_message), 'hiển thị danh sách khách hàng') !== false) {
-            // Kiểm tra xem có dữ liệu khách hàng được truyền vào không
-            if (!isset($_SESSION['customer_list']) || empty($_SESSION['customer_list'])) {
-                $chat_reply = "Hiện tại chưa có dữ liệu khách hàng để hiển thị.";
-                return;
-            }
-
-            $customers = $_SESSION['customer_list'];
-            $chat_reply = "Danh sách khách hàng:\n\n";
-            
-            foreach ($customers as $index => $customer) {
-                $name = $customer['name'] ?? 'N/A';
-                $email = $customer['email'] ?? 'N/A';
-                $phone = $customer['phone'] ?? 'N/A';
-                $company = $customer['company'] ?? 'N/A';
-                $birthday = $customer['birthday'] ? date('d/m/Y', strtotime($customer['birthday'])) : 'N/A';
-                
-                $chat_reply .= ($index + 1) . ". {$name}\n";
-                $chat_reply .= "   - Email: {$email}\n";
-                $chat_reply .= "   - Số điện thoại: {$phone}\n";
-                $chat_reply .= "   - Công ty: {$company}\n";
-                $chat_reply .= "   - Ngày sinh: {$birthday}\n\n";
-            }
-            
-            $totalCustomers = count($customers);
-            $chat_reply .= "Tổng số khách hàng: {$totalCustomers}\n\n";
-            $chat_reply .= "Bạn có thể:\n";
-            $chat_reply .= "1. Tìm kiếm khách hàng theo tên\n";
-            $chat_reply .= "2. Lọc khách hàng theo công ty\n";
-            $chat_reply .= "3. Xem chi tiết thông tin khách hàng";
+        if (preg_match('/hiển\s*thị\s*danh\s*sách\s*khách\s*hàng/i', $user_message)) {
+          try {
+              $customers = $customerModel->getAllCustomers();
+              error_log("Customers retrieved: " . print_r($customers, true));
+              
+              if (empty($customers)) {
+                  $chat_reply = "Hiện tại chưa có khách hàng nào trong hệ thống.\n\nBạn có thể:\n1. Thêm khách hàng mới\n2. Xem hướng dẫn";
+              } else {
+                  $chat_reply = "Danh sách khách hàng:\n\n";
+                  foreach ($customers as $index => $customer) {
+                      $id = "KH0". $customer['customer_id'] ?? 'N/A';
+                      $name = $customer['name'] ?? 'N/A';
+                      $email = $customer['email'] ?? 'N/A';
+                      $phone = $customer['phone'] ?? 'N/A';
+                      $company = $customer['company'] ?? 'N/A';
+                      $birthday = isset($customer['birthday']) ? date('d/m/Y', strtotime($customer['birthday'])) : 'N/A';
+                      $tags = $customer['tags'] ?? 'N/A';
+                      $address = $customer['address'] ?? 'N/A';
+                      $chat_reply .= ($index + 1) .  ". {$id} - {$name}\n   - Email: {$email}\n   - Số điện thoại: {$phone}\n   - Công ty: {$company}\n   - Ngày sinh: {$birthday}\n   - Địa chỉ: {$address}\n   - Thẻ: {$tags}\n\n";
+                  }
+                  $chat_reply .= "Tổng số khách hàng: " . count($customers). " - Thời gian hiện tại: " . date('Y-m-d H:i:s');
+              }
+          } catch (Exception $e) {
+              error_log("Database error: " . $e->getMessage());
+              $chat_reply = "Lỗi khi lấy danh sách khách hàng: " . $e->getMessage();
         }
+      } 
         // Xử lý thêm khách hàng mới
         elseif (strpos(strtolower($user_message), 'thêm khách hàng') !== false) {
             // Kiểm tra xem có dữ liệu khách hàng mới được truyền vào không
@@ -179,7 +215,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["user_message"])) {
                         $messages[] = [
                             'role' => $role,
                             'parts' => [
-                                ['text' => $message['content']]
+                              ['text' => $message['content']]
                             ]
                         ];
                     }
@@ -316,10 +352,13 @@ ob_start();
 
           <?php 
           // Display chat history, skipping the system message
-          if (isset($_SESSION['chat_messages']) && count($_SESSION['chat_messages']) > 1) {
-              for ($i = 1; $i < count($_SESSION['chat_messages']); $i++) {
-                  $message = $_SESSION['chat_messages'][$i];
-                  if ($message['role'] == 'user') {
+          if (isset($_SESSION['chat_messages']) && is_array($_SESSION['chat_messages'])) {
+              foreach ($_SESSION['chat_messages'] as $message) {
+                  if (!isset($message['role']) || !isset($message['content'])) {
+                      continue;
+                  }
+                  
+                  if ($message['role'] === 'user') {
           ?>
           <!-- User Message -->
           <div class="chat-message user-message mb-3">
@@ -335,7 +374,7 @@ ob_start();
               <img src="/public/assets/images/avatar.png" alt="User" class="rounded-circle">
             </div>
           </div>
-          <?php } elseif ($message['role'] == 'assistant') { ?>
+          <?php } elseif ($message['role'] === 'assistant') { ?>
           <!-- Bot Response -->
           <div class="chat-message bot-message mb-3">
             <div class="message-avatar">
@@ -392,16 +431,16 @@ ob_start();
       <div class="card-body p-0">
         <div class="list-group list-group-flush">
           <button class="list-group-item list-group-item-action suggestion-item">
-            Danh sách khách hàng tiềm năng?
+            Hiển thị danh sách khách hàng
           </button>
           <button class="list-group-item list-group-item-action suggestion-item">
-            Hiển thị dự án sắp hết hạn trong tuần này
+            Trong 30 ngày tới có ai sinh nhật không?
           </button>
           <button class="list-group-item list-group-item-action suggestion-item">
-            Tương tác gần đây với khách hàng Công ty XYZ
+            Khách hàng có tag VIP
           </button>
           <button class="list-group-item list-group-item-action suggestion-item">
-            Tạo tương tác mới với khách hàng mã KH010
+            Thông tin khách hàng mã KH040
           </button>
           <button class="list-group-item list-group-item-action suggestion-item">
             Tổng doanh thu từ dự án trong tháng này?
@@ -846,6 +885,8 @@ document.addEventListener('DOMContentLoaded', function() {
           for (let i = 1; i < messages.length; i++) {
             messages[i].remove();
           }
+
+
         })
         .catch(error => {
           console.error('Lỗi khi xóa lịch sử trò chuyện:', error);
