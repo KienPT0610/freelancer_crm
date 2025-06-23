@@ -47,7 +47,7 @@ freelancer_crm/
 ## Cách chạy dự án
 
 1.  **Đảm bảo web server đã được cài đặt và cấu hình đúng.** Ví dụ, nếu bạn sử dụng Apache, hãy đảm bảo module `mod_rewrite` đã được kích hoạt (nếu bạn định sử dụng rewrite URL).
-2.  **Khởi động web server của bạn.**
+2.  **Khởi động web server của bạn. `php -S localhost:3000`**
 3.  **Truy cập dự án thông qua trình duyệt web.** Sử dụng URL mà bạn đã cấu hình cho web server (ví dụ: `http://localhost/freelancer_crm/` nếu `public/` là thư mục gốc).
 
     - Nếu bạn đã cấu hình Virtual Host, bạn có thể truy cập bằng tên miền đã cấu hình (ví dụ: `http://freelancer.local/`).
