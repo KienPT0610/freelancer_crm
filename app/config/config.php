@@ -1,8 +1,8 @@
 <?php
 // Database Configuration
 define('DB_HOST', 'localhost');
-define('DB_PORT', '3307');
-define('DB_NAME', 'freelancer_db');
+define('DB_PORT', '3306');
+define('DB_NAME', 'testcrm');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 

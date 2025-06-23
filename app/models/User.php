@@ -25,4 +25,32 @@ class User {
       return '';
     }
   }
+
+  // chanage  password
+  public function changePassword($userId, $newPassword) {
+    $pdo = $this->db->getConnection();
+    
+    // Mã hóa mật khẩu mới
+    $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+    
+    // Cập nhật mật khẩu trong cơ sở dữ liệu
+    $sql = "UPDATE users SET password_hash = :password WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute(['password' => $hashedPassword, 'id' => $userId]);
+  }
+
+  public function getUserById($userId) {
+    // check connected admin
+    if (!isset($_SESSION['user_id'])) {
+      return false;
+    }
+    
+    $pdo = $this->db->getConnection();
+    
+    // Truy vấn thông tin người dùng theo ID
+    $sql = "SELECT * FROM users WHERE user_id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $userId]);
+    return $stmt->fetch();
+  }
 }

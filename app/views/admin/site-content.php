@@ -87,7 +87,7 @@ ob_start();
               </div>
             </th>
             <th>Mã Nội Dung</th>
-            <th>Tiêu Đề</th>
+            <!-- <th>Tiêu Đề</th> -->
             <th>Khóa (Key)</th>
             <th>Giá Trị</th>
             <th>Trạng Thái</th>
@@ -116,7 +116,6 @@ ob_start();
             <td>
               <span class="fw-bold">#<?php echo str_pad($content['content_id'], 4, '0', STR_PAD_LEFT); ?></span>
             </td>
-            <td><?php echo htmlspecialchars($content['content_title']); ?></td>
             <td>
               <span class="badge bg-secondary"><?php echo htmlspecialchars($content['content_key']); ?></span>
             </td>
@@ -139,7 +138,6 @@ ob_start();
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
                   data-bs-target="#editContentModal" data-content-id="<?php echo $content['content_id']; ?>"
-                  data-content-title="<?php echo htmlspecialchars($content['content_title']); ?>"
                   data-content-key="<?php echo htmlspecialchars($content['content_key']); ?>"
                   data-content-value="<?php echo htmlspecialchars($content['content_value']); ?>"
                   data-is-active="<?php echo $content['is_active']; ?>">
@@ -147,11 +145,10 @@ ob_start();
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
                   data-bs-target="#viewContentModal" data-content-id="<?php echo $content['content_id']; ?>"
-                  data-content-title="<?php echo htmlspecialchars($content['content_title']); ?>"
                   data-content-key="<?php echo htmlspecialchars($content['content_key']); ?>"
                   data-content-value="<?php echo htmlspecialchars($content['content_value']); ?>"
                   data-is-active="<?php echo $content['is_active']; ?>"
-                  data-created-at="<?php echo date('d/m/Y H:i', strtotime($content['created_at'])); ?>"
+                  data-created-at="<?php echo date('d/m/Y H:i', strtotime($content['last_updated'])); ?>"
                   data-updated-at="<?php echo !empty($content['last_updated']) ? date('d/m/Y H:i', strtotime($content['last_updated'])) : 'Chưa cập nhật'; ?>">
                   <i class="fas fa-eye"></i>
                 </button>
@@ -240,11 +237,6 @@ ob_start();
         <form id="editContentForm" action="/admin/site-content/update" method="POST">
           <input type="hidden" id="editContentId" name="content_id">
           <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="editContentTitle" class="form-label">Tiêu Đề Nội Dung <span
-                  class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="editContentTitle" name="content_title" required>
-            </div>
             <div class="col-md-6">
               <label for="editContentKey" class="form-label">Khóa (Key) <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="editContentKey" name="content_key" required>
