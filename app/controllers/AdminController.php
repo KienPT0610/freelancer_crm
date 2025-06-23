@@ -253,6 +253,10 @@ class AdminController {
   }
 
   public function profile() {
+    // load user model
+    $userModel = new User();
+    $user = $userModel->getUserById($_SESSION['user']['user_id']);
+    // print_r($_SESSION['user']);
     include __DIR__ . '/../views/admin/profile.php';
   }
 
@@ -381,5 +385,25 @@ class AdminController {
   public function chatbot() {
     // Render the chatbot view
     include __DIR__ . '/../views/admin/chatbot.php';
+  }
+
+  public function updatePassword() {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      $userId = $_SESSION['user']['user_id'];
+      $newPassword = $_POST['new_password'];
+      $confirmPassword = $_POST['confirm_password'];
+
+      if ($newPassword !== $confirmPassword) {
+        $_SESSION['error'] = 'Mật khẩu không khớp.';
+        header('Location: /admin/profile');
+        exit();
+      }
+
+      $userModel = new User();
+      $userModel->changePassword($userId, $newPassword);
+      $_SESSION['success'] = 'Đổi mật khẩu thành công.';
+      header('Location: /admin/profile');
+      exit();
+    }
   }
 }

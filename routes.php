@@ -87,26 +87,32 @@ if ($request == '/') {
 } elseif ($request == '/admin/settings') {
   $adminController = new AdminController();
   $adminController->settings();
+  
 } elseif ($request == '/admin/site-content') {
   $adminController = new AdminController();
   $adminController->siteContent();
 } elseif($request == '/admin/site-content/add') {
   $adminController = new AdminController();
   $adminController->addSiteContent();
+  
 } elseif (preg_match('#^/admin/site-content/(\d+)/update$#', $request, $matches)) {
   $id = $matches[1];
   $adminController = new AdminController();
   $adminController->updateSiteContent($id);
+  
 } elseif (preg_match('#^/admin/site-content/(\d+)/delete$#', $request, $matches)) {
   $id = $matches[1];
   $adminController = new AdminController();
   $adminController->deleteSiteContent($id);
+  
 } elseif ($request == '/admin/chatbot') {
   $adminController = new AdminController();
   $adminController->chatbot();
+  
 } elseif ($request == '/logout') {
   $adminController = new AdminController();
   $adminController->logout();
+  
 } elseif ($request == '/admin/test') {
   include __DIR__ . '/app/views/admin/test.php';
 } else {

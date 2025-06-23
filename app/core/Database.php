@@ -1,6 +1,6 @@
 <?php
 namespace App\Core;
-require_once __DIR__ . './../config/config.php';
+require_once __DIR__ . '/../config/config.php';
 class Database {
     private static ?Database $instance = null;
     private \PDO $pdo;

@@ -5,6 +5,7 @@ $active_page = 'profile';
 
 // Start output buffering to capture content
 ob_start();
+// print_r($_user);
 ?>
 
 <!-- Page Header -->
@@ -27,7 +28,7 @@ ob_start();
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="fullName" class="form-label">Họ Tên</label>
-              <input type="text" class="form-control" id="fullName" name="fullName" value="Admin User">
+              <input type="text" class="form-control" id="fullName" name="fullName" value="Admin">
             </div>
             <div class="col-md-6">
               <label for="jobTitle" class="form-label">Chức Vụ</label>
@@ -46,7 +47,8 @@ ob_start();
           </div>
           <div class="mb-3">
             <label for="bio" class="form-label">Giới Thiệu</label>
-            <textarea class="form-control" id="bio" name="bio" rows="3">Quản trị viên hệ thống với hơn 5 năm kinh nghiệm trong lĩnh vực quản lý dự án và phát triển website.</textarea>
+            <textarea class="form-control" id="bio" name="bio"
+              rows="3">Quản trị viên hệ thống với hơn 5 năm kinh nghiệm trong lĩnh vực quản lý dự án và phát triển website.</textarea>
           </div>
         </form>
       </div>
@@ -131,9 +133,11 @@ ob_start();
       </div>
       <div class="card-body d-flex flex-column align-items-center text-center">
         <div class="position-relative mb-3">
-          <img src="../../../public/assets/images/avatar.png" alt="Profile photo" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+          <img src="../../../public/assets/images/avatar.png" alt="Profile photo" class="rounded-circle img-thumbnail"
+            style="width: 150px; height: 150px; object-fit: cover;">
           <div class="position-absolute bottom-0 end-0">
-            <button class="btn btn-sm btn-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#changePhotoModal">
+            <button class="btn btn-sm btn-primary rounded-circle" data-bs-toggle="modal"
+              data-bs-target="#changePhotoModal">
               <i class="fas fa-camera"></i>
             </button>
           </div>
@@ -172,7 +176,8 @@ ob_start();
             <span class="badge bg-primary">Admin</span>
           </li>
           <li class="list-group-item px-0">
-            <button class="btn btn-sm btn-outline-warning w-100" data-bs-toggle="modal" data-bs-target="#twoFactorModal">
+            <button class="btn btn-sm btn-outline-warning w-100" data-bs-toggle="modal"
+              data-bs-target="#twoFactorModal">
               <i class="fas fa-shield-alt me-1"></i> Cài Đặt Xác Thực 2 Lớp
             </button>
           </li>
@@ -232,7 +237,8 @@ ob_start();
           <div class="mb-3 d-none" id="previewContainer">
             <label class="form-label">Xem Trước</label>
             <div class="text-center">
-              <img id="photoPreview" class="img-thumbnail rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+              <img id="photoPreview" class="img-thumbnail rounded-circle"
+                style="width: 150px; height: 150px; object-fit: cover;">
             </div>
           </div>
         </form>
@@ -280,7 +286,7 @@ ob_start();
           <h5>Tăng Cường Bảo Mật Tài Khoản</h5>
           <p class="text-muted">Xác thực hai lớp giúp bảo vệ tài khoản của bạn khỏi các truy cập trái phép.</p>
         </div>
-        
+
         <div class="mb-4">
           <div class="form-check">
             <input class="form-check-input" type="radio" name="twoFactorType" id="emailAuth" checked>
@@ -301,7 +307,7 @@ ob_start();
             </label>
           </div>
         </div>
-        
+
         <div class="alert alert-warning">
           <i class="fas fa-exclamation-triangle me-2"></i>
           Lưu ý: Sau khi bật xác thực hai lớp, bạn sẽ cần nhập mã xác nhận mỗi lần đăng nhập vào hệ thống.
@@ -321,51 +327,51 @@ document.addEventListener('DOMContentLoaded', function() {
   const photoUpload = document.getElementById('photoUpload');
   const photoPreview = document.getElementById('photoPreview');
   const previewContainer = document.getElementById('previewContainer');
-  
+
   photoUpload.addEventListener('change', function(e) {
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
-      
+
       reader.onload = function(e) {
         photoPreview.src = e.target.result;
         previewContainer.classList.remove('d-none');
       }
-      
+
       reader.readAsDataURL(e.target.files[0]);
     }
   });
-  
+
   // Xử lý đổi mật khẩu
   const newPassword = document.getElementById('newPassword');
   const confirmPassword = document.getElementById('confirmPassword');
   const changePasswordBtn = document.getElementById('changePasswordBtn');
-  
+
   changePasswordBtn.addEventListener('click', function() {
     // Kiểm tra mật khẩu hiện tại
     if (!document.getElementById('currentPassword').value) {
       alert('Vui lòng nhập mật khẩu hiện tại');
       return;
     }
-    
+
     // Kiểm tra mật khẩu mới
     if (!newPassword.value) {
       alert('Vui lòng nhập mật khẩu mới');
       return;
     }
-    
+
     // Kiểm tra xác nhận mật khẩu
     if (newPassword.value !== confirmPassword.value) {
       alert('Xác nhận mật khẩu không khớp');
       return;
     }
-    
+
     // Đổi mật khẩu thành công
     alert('Đổi mật khẩu thành công');
-    
+
     // Reset form
     document.getElementById('passwordForm').reset();
   });
-  
+
   // Xử lý lưu thay đổi
   document.getElementById('saveChangesBtn').addEventListener('click', function() {
     alert('Thông tin cá nhân đã được cập nhật!');
@@ -379,4 +385,4 @@ $content = ob_get_clean();
 
 // Include the layout template
 include __DIR__ . '/layout.php';
-?> 
+?>
